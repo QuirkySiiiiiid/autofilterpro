@@ -48,7 +48,6 @@ PING_CAPTIONS = [
 ]
 
 @Client.on_message(filters.command("alive", CMD) & filters.private)
-@check_user_ban
 async def check_alive(_, message):
     # Delete the command message
     try:

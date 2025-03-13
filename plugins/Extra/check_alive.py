@@ -2,7 +2,6 @@ import time
 import random
 import asyncio
 from pyrogram import Client, filters
-from helper_func import check_user_ban
 
 CMD = ["/", "."]
 

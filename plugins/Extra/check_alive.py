@@ -76,7 +76,6 @@ async def check_alive(_, message):
         pass
 
 @Client.on_message(filters.command("ping", CMD))
-@check_user_ban
 async def ping(_, message):
     start_t = time.time()
     rm = await message.reply_text("🏓 ᴘɪɴɢɪɴɢ...")

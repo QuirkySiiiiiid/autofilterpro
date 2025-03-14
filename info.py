@@ -100,7 +100,7 @@ IS_TUTORIAL = bool(environ.get('IS_TUTORIAL', False))
 # ============================
 # Channel & Group Links Configuration
 # ============================
-GRP_LNK = environ.get('GRP_LNK', 'https://t.me/Moviess_Ok')
+GRP_LNK = environ.get('GRP_LNK', 'https://t.me/+kj3GsiQX8rxhMTQ1')
 CHNL_LNK = environ.get('CHNL_LNK', 'https://t.me/Moviess_Ok')
 OWNER_LNK = environ.get('OWNER_LNK', 'https://t.me/Moviess_Ok')
 MOVIE_UPDATE_CHANNEL_LNK = environ.get('MOVIE_UPDATE_CHANNEL_LNK', 'https://t.me/Moviess_Ok')

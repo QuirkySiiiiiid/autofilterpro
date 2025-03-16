@@ -83,7 +83,7 @@ CAPTION_LANGUAGES = ["Bhojpuri", "Hindi", "Bengali", "Tamil", "English", "Bangla
 # ============================
 # Verification Settings
 # ============================
-VERIFY = bool(environ.get('VERIFY', True))  # Verification On (True) / Off (False)
+VERIFY = bool(environ.get('VERIFY', False))  # Verification On (True) / Off (False)
 VERIFY_EXPIRE = int(environ.get('VERIFY_EXPIRE', 24))  # Add time in hours
 VERIFIED_LOG = int(environ.get('VERIFIED_LOG', '-1001637425340'))  # Log channel id (make sure bot is admin)
 HOW_TO_VERIFY = environ.get('HOW_TO_VERIFY', 'https://t.me/Moviess_Ok/43')  # How to open tutorial link for verification

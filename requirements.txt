@@ -6,7 +6,7 @@ colorama
 datetime
 dnspython==2.3.0
 ffmpeg-python>=0.2.0
-httpx[http2]
+httpx[http2]==0.23.0
 jinja2
 marshmallow==3.26.1
 motor==3.7.0

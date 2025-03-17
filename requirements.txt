@@ -54,7 +54,7 @@ python-Levenshtein
 bard
 beautifulsoup4
 google-generativeai
-googletrans==3.1.0a0
+googletrans-new
 gtts==2.3.1
 lexica-api
 MukeshAPI

@@ -54,7 +54,35 @@ async def handle_chat_model(message: Message, model_name: str, model):
 
 @Client.on_message(filters.command("bard"))
 async def bard_handler(client: Client, message: Message):
-    await handle_chat_model(message, "Bard", languageModels.bard)
+    try:
+        if len(message.command) < 2:
+            await message.reply_text("Please provide a query after the command.")
+            return
+            
+        query = message.text.split(' ', 1)[1]
+        lexica_client = AsyncClient()
+        
+        try:
+            messages = [Messages(content=query, role="user")]
+            response = await lexica_client.ChatCompletion(messages, languageModels.bard)
+            
+            if not response:
+                await message.reply_text("Sorry, I couldn't get a response. Please try again.")
+                return
+                
+            content = str(response.get('content', ''))
+            if content:
+                await message.reply_text(content)
+            else:
+                await message.reply_text("Received empty response from API.")
+                
+        except Exception as e:
+            await message.reply_text(f"API Error: {str(e)}")
+        finally:
+            await lexica_client.close()
+            
+    except Exception as e:
+        await message.reply_text(f"Error processing request: {str(e)}")
 
 
 @Client.on_message(filters.command("gemini"))
@@ -96,10 +124,10 @@ async def geminivision_handler(client: Client, message: Message):
         with open(file_path, "rb") as image_file:
             data = base64.b64encode(image_file.read()).decode("utf-8")
             mime_type, _ = mimetypes.guess_type(file_path)
-            image_info = [{"data": data, "mime_type": mime_type}]
-        
-        messages = [Messages(content=prompt, role="user", images=image_info)]
+            
+        messages = [{"role": "user", "content": prompt, "image": {"data": data, "mime_type": mime_type}}]
         response = await lexica_client.ChatCompletion(messages, languageModels.geminiVision)
+        
         content = extract_content(response)
         await message.reply_text(format_response("Gemini Vision", content) if content else "No content received from the API.")
     except Exception as e:
@@ -139,7 +167,6 @@ async def upscale_handler(client: Client, message: Message):
         if os.path.exists(upscaled_image_path):
             os.remove(upscaled_image_path)
         await status_message.delete()
-
 
 
 
@@ -284,3 +311,4 @@ async def upscale_handler(client: Client, message: Message):
 #         if os.path.exists(upscaled_image_path):
 #             os.remove(upscaled_image_path)
 #         await status_message.delete()
+

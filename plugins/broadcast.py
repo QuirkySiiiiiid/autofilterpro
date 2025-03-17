@@ -1,7 +1,7 @@
 import datetime, time, os, asyncio,logging 
 from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid
 from pyrogram.errors.exceptions.bad_request_400 import MessageTooLong, PeerIdInvalid
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram import Client, filters, enums
 from database.users_chats_db import db
 from info import ADMINS, GRP_LNK
@@ -215,6 +215,87 @@ async def broadcast_messages(user_id, message, reply_markup=None):
         logging.info(f"{user_id} - PeerIdInvalid")
         return False, "Error"
     except Exception as e:
+        return False, "Error"
+
+@Client.on_message(filters.command("smartcast") & filters.user(ADMINS) & filters.reply)
+async def smart_broadcast(bot, message):
+    b_msg = message.reply_to_message
+    # Create inline keyboard with only pin option
+    buttons = InlineKeyboardMarkup([
+        [InlineKeyboardButton("📌 Broadcast & Pin Message", callback_data="broadcast_pin")]
+    ])
+    await message.reply_text(
+        "Smart Broadcast\n\n"
+        "This will broadcast and pin the message to all users.\n"
+        "For regular broadcast without pin, use /broadcast command.", 
+        reply_markup=buttons
+    )
+
+@Client.on_callback_query(filters.regex('^broadcast_pin'))
+async def broadcast_callback(bot, query: CallbackQuery):
+    users = await db.get_all_users()
+    b_msg = query.message.reply_to_message
+    
+    sts = await query.message.edit_text('📤 Broadcasting and pinning your message...')
+    start_time = time.time()
+    total_users = await db.total_users_count()
+    done = 0
+    blocked = 0
+    deleted = 0
+    failed = 0
+    success = 0
+    
+    async for user in users:
+        pti, sh = await broadcast_and_pin(int(user['id']), b_msg)
+        if pti:
+            success += 1
+        elif pti == False:
+            if sh == "Blocked":
+                blocked += 1
+            elif sh == "Deleted":
+                deleted += 1
+            elif sh == "Error":
+                failed += 1
+        done += 1
+        
+        if not done % 20:
+            await sts.edit(
+                f"📤 Smart Broadcast Progress:\n\n"
+                f"Total Users: {total_users}\n"
+                f"Completed: {done}/{total_users}\n"
+                f"Success: {success}\n"
+                f"Blocked: {blocked}\n"
+                f"Deleted: {deleted}"
+            )
+    
+    time_taken = datetime.timedelta(seconds=int(time.time()-start_time))
+    await sts.delete()
+    await bot.send_message(
+        query.message.chat.id,
+        f"📤 Smart Broadcast Completed\n"
+        f"Time Taken: {time_taken}\n\n"
+        f"Total Users: {total_users}\n"
+        f"Completed: {done}/{total_users}\n"
+        f"Success: {success}\n"
+        f"Blocked: {blocked}\n"
+        f"Deleted: {deleted}"
+    )
+
+async def broadcast_and_pin(user_id, message):
+    try:
+        sent_message = await message.copy(chat_id=user_id)
+        try:
+            await sent_message.pin(disable_notification=True)
+        except:
+            pass
+        return True, "Success"
+    except FloodWait as e:
+        await asyncio.sleep(e.value)
+        return await broadcast_and_pin(user_id, message)
+    except (InputUserDeactivated, UserIsBlocked, PeerIdInvalid):
+        await db.delete_user(int(user_id))
+        return False, "Deleted/Blocked"
+    except Exception:
         return False, "Error"
 
 

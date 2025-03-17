@@ -280,7 +280,7 @@ async def send_msg(bot, filename, caption):
 
         filename = re.sub(r"[\(\)\[\]\{\}:;'\-!]", "", filename)
 
-        text = "#𝑵𝒆𝒘_𝑭𝒊𝒍𝒆_𝑨𝒅𝒅𝒆𝒅 ✅\n\n👷𝑵𝒂𝒎𝒆: `{}`\n\n🌳𝑸𝒖𝒂𝒍𝒊𝒕𝒚: {}\n\n🍁𝑨𝒖𝒅𝒊𝒐: {}"
+        text = "#𝙉𝙚𝙬_𝙛𝙞𝙡𝙚_𝙖𝙙𝙙𝙚𝙙 ✅\n\n⤷𝙉𝙖𝙢𝙚: `{}`\n\n⤷𝙌𝙪𝙖𝙡𝙞𝙩𝙮: {}\n\n⤷𝘼𝙪𝙙𝙞𝙤: {}"
         text = text.format(filename, quality, language)
 
         if await add_name(OWNERID, filename):
@@ -293,7 +293,7 @@ async def send_msg(bot, filename, caption):
                     resized_poster = await fetch_image(poster_url)  
 
             filenames = filename.replace(" ", '-')
-            btn = [[InlineKeyboardButton('🌲 Get Files 🌲', url=f"https://telegram.me/{temp.U_NAME}?start=getfile-{filenames}")]]
+            btn = [[InlineKeyboardButton('ღ Get Files ღ', url=f"https://telegram.me/{temp.U_NAME}?start=getfile-{filenames}")]]
             
             if resized_poster:
                 await bot.send_photo(chat_id=MOVIE_UPDATE_CHANNEL, photo=resized_poster, caption=text, reply_markup=InlineKeyboardMarkup(btn))

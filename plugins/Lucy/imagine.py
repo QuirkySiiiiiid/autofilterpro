@@ -98,24 +98,26 @@ async def generate_image(client, message):
         wait_message = await message.reply_text("🎨 Generating your image, please wait...")
         StartTime = time.time()
 
-        # Lexica API endpoint
-        url = "https://lexica.art/api/v1/generate"
+        # Updated Lexica API endpoint and headers
+        url = "https://api.lexica.art/v2/generate"
         
-        # Request headers and data
         headers = {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Accept": "application/json"
         }
         
         data = {
             "prompt": prompt,
+            "model": "lexica",  # or "stable-diffusion"
             "width": 512,
             "height": 512,
             "guidance_scale": 7.5,
-            "num_inference_steps": 50
+            "num_inference_steps": 50,
+            "seed": int(time.time())  # Random seed
         }
 
         # Send request to the API
-        response = requests.post(url, headers=headers, json=data)
+        response = requests.post(url, headers=headers, json=data, timeout=60)
 
         if response.status_code == 200:
             try:
@@ -145,7 +147,7 @@ async def generate_image(client, message):
             except Exception as e:
                 await wait_message.edit_text(f"❌ Error processing the image: {str(e)}")
         else:
-            await wait_message.edit_text(f"❌ API Error: {response.status_code}")
+            await wait_message.edit_text(f"❌ API Error: {response.status_code} - {response.text}")
         
         # Delete wait message if it still exists
         try:

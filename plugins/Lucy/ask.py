@@ -4,6 +4,7 @@ from pyrogram import Client, filters
 from pyrogram.types import Message
 from pyrogram.enums import ChatAction
 from lexica import AsyncClient, languageModels, Messages
+import random
 
 def extract_content(response):
     try:
@@ -38,34 +39,95 @@ def extract_content(response):
     except Exception as e:
         return f"Error parsing response: {str(e)}"
 
-@Client.on_message(filters.command(["ucy"], prefixes=["L", "i"]))
-async def gpt_handler(client: Client, message: Message):
+# Robin's characteristic phrases and mannerisms
+ROBIN_INTROS = [
+    "Fufufu... How interesting.",
+    "Ara ara...",
+    "My, my...",
+    "How fascinating...",
+    "*adjusts glasses* Hmm..."
+]
+
+ROBIN_ENDINGS = [
+    "Perhaps the answers lie in the shadows of history...",
+    "Just like the Poneglyphs, truth has many layers.",
+    "Knowledge, like archaeology, requires patience and dedication.",
+    "The world holds many mysteries, doesn't it?",
+    "Sometimes the darkest chapters hold the brightest insights."
+]
+
+ROBIN_NO_QUERY_RESPONSES = [
+    f"📚 *chuckles* As an archaeologist and scholar, I find curiosity to be humanity's most endearing trait. What knowledge do you seek?",
+    "🗿 The Poneglyphs taught me that every question leads to a deeper understanding. What would you like to know?",
+    "🌺 *sprouting a hand with a book* Knowledge is like the petals of a flower, each one revealing a new truth. Shall we explore together?",
+    "📜 Even the darkest corners of history hold valuable lessons. What mysteries shall we uncover?",
+    "🎭 *adjusts glasses* In my years of study, I've learned that every question is worth asking. What's on your mind?"
+]
+
+@Client.on_message(filters.command(["obin"], prefixes=["R", "r"]))
+async def robin_handler(client: Client, message: Message):
     try:
         await client.send_chat_action(message.chat.id, ChatAction.TYPING)
-        name = message.from_user.first_name or "User"
+        name = message.from_user.first_name or "Nakama"
 
+        # Personal introduction if no query
         if len(message.command) < 2:
-            await message.reply_text(f"<b>Hello {name}, I am Lucy. How can I help you today?</b>")
+            intro = random.choice(ROBIN_NO_QUERY_RESPONSES)
+            personal_info = (
+                f"\n\n💫 I am Nico Robin, the archaeologist of the Straw Hat Pirates. "
+                f"With the power of the Hana Hana no Mi and years of scholarly research, "
+                f"I've accumulated vast knowledge about this world.\n\n"
+                f"Feel free to ask me about anything, {name}. *sprouts an extra hand to wave* Fufufu..."
+            )
+            await message.reply_text(intro + personal_info)
             return
 
         query = message.text.split(' ', 1)[1]
         
+        # Prepare Robin's scholarly context for the AI
+        robin_context = (
+            "Respond as Nico Robin from One Piece, the scholarly archaeologist with a calm and mysterious demeanor. "
+            "Use her characteristic 'fufufu' laugh occasionally and maintain her elegant, intellectual speaking style. "
+            "Include relevant archaeological or historical references when appropriate. "
+            "Question: " + query
+        )
+        
         lexica_client = AsyncClient()
         try:
-            # Create messages list with the user's query
-            messages = [Messages(content=query, role="user")]
+            messages = [Messages(content=robin_context, role="user")]
             response = await lexica_client.ChatCompletion(messages, languageModels.gpt)
+            
             if not response:
-                await message.reply_text("Sorry, I couldn't get a response. Please try again.")
+                await message.reply_text(
+                    "Fufufu... It seems this mystery eludes even my expertise. "
+                    "Shall we try a different approach?"
+                )
                 return
+            
             content = extract_content(response)
-            await message.reply_text(content)
+            
+            # Format Robin's response
+            formatted_response = (
+                f"{random.choice(ROBIN_INTROS)}\n\n"
+                f"📚 {content}\n\n"
+                f"_{random.choice(ROBIN_ENDINGS)}_"
+            )
+            
+            await message.reply_text(formatted_response)
+
         except Exception as e:
-            await message.reply_text(f"Error in API call: {str(e)}")
+            await message.reply_text(
+                "Fufufu... Even with all my years of research, some answers remain elusive. "
+                f"Perhaps we should rephrase the question? Error: {str(e)}"
+            )
         finally:
             await lexica_client.close()
+
     except Exception as e:
-        await message.reply_text(f"An unexpected error occurred: {str(e)}")
+        await message.reply_text(
+            "*adjusts glasses* It seems we've encountered an unexpected puzzle. "
+            f"Let's try again, shall we? Error: {str(e)}"
+        )
 
 @Client.on_message(filters.command(["chatgpt", "ai", "ask", "Master"], prefixes=["+", ".", "/", "-", "?", "$", "#", "&"]))
 async def chat_gpt(client: Client, message: Message):
@@ -85,10 +147,16 @@ async def chat_gpt(client: Client, message: Message):
             messages = [Messages(content=query, role="user")]
             response = await lexica_client.ChatCompletion(messages, languageModels.gpt)
             
-            # Extract content with improved error handling
+            if not response:
+                await message.reply_text("I apologize, but I couldn't process your request. Please try again.")
+                return
+                
             content = extract_content(response)
-            
-            # If content is too long, split it into multiple messages
+            if not content or content.strip() == "":
+                await message.reply_text("I apologize, but I received an empty response. Please try again.")
+                return
+                
+            # Split long responses into chunks
             if len(content) > 4096:
                 chunks = [content[i:i+4096] for i in range(0, len(content), 4096)]
                 for chunk in chunks:
@@ -97,11 +165,13 @@ async def chat_gpt(client: Client, message: Message):
                 await message.reply_text(content)
                 
         except Exception as e:
-            await message.reply_text(f"Error in API call: {str(e)}")
+            print(f"API Error: {str(e)}")  # For debugging
+            await message.reply_text("I apologize, but I encountered an error processing your request. Please try again.")
         finally:
             await lexica_client.close()
     except Exception as e:
-        await message.reply_text(f"An unexpected error occurred: {str(e)}")
+        print(f"General Error: {str(e)}")  # For debugging
+        await message.reply_text("An unexpected error occurred. Please try again later.")
 
 @Client.on_message(filters.command(["ssis"], prefixes=["a", "A"]))
 async def chat_annie(client: Client, message: Message):
@@ -110,10 +180,14 @@ async def chat_annie(client: Client, message: Message):
         name = message.from_user.first_name or "User"
 
         if len(message.command) < 2:
-            await message.reply_text(f"<b>Hello {name}, I am Lucy. How can I assist you today?</b>")
+            await message.reply_text(f"<b>Hello {name}, I am Nɪᴄᴏ Rᴏʙɪɴ. How can I assist you today?</b>")
             return
 
         query = message.text.split(' ', 1)[1]
+        
+        # Limit query length to prevent heavy processing
+        if len(query) > 500:
+            query = query[:500] + "..."
         
         lexica_client = AsyncClient()
         try:
@@ -125,29 +199,30 @@ async def chat_annie(client: Client, message: Message):
                 await message.reply_text("Sorry, I couldn't generate a response. Please try again.")
                 return
                 
-            # Limit content length for voice conversion
-            if len(content) > 1000:
-                content = content[:1000] + "..."
+            # Stricter limit on content length
+            if len(content) > 300:
+                content = content[:300] + "..."
             
+            # Generate audio only if content is not too long
             audio_file = "response.mp3"
-            try:
-                tts = gTTS(text=content, lang='en')
-                tts.save(audio_file)
-                
-                await client.send_voice(chat_id=message.chat.id, voice=audio_file)
-                await message.reply_text(content)  # Also send the text response
-            except Exception as e:
-                await message.reply_text(f"Error generating voice: {str(e)}\n\nText response: {content}")
+            tts = gTTS(text=content, lang='en', slow=False)  # Added slow=False for faster processing
+            tts.save(audio_file)
             
-        except Exception as e:
-            await message.reply_text(f"Error in API call: {str(e)}")
-        finally:
-            await lexica_client.close()
+            # Send voice first, then delete file immediately
+            await client.send_voice(chat_id=message.chat.id, voice=audio_file)
             if os.path.exists(audio_file):
                 os.remove(audio_file)
-    except Exception as e:
-        await message.reply_text(f"An unexpected error occurred: {str(e)}")
-
+            
+            # Send text response after voice
+            await message.reply_text(content)
+            
+        except Exception as e:
+            await message.reply_text("Sorry, I encountered an error. Please try again.")
+        finally:
+            await lexica_client.close()
+            
+    except Exception:
+        await message.reply_text("An error occurred. Please try again later.")
 
 
 
@@ -260,3 +335,4 @@ async def chat_annie(client: Client, message: Message):
 #                 os.remove(audio_file)
 #     except Exception as e:
 #         await message.reply_text(f"An unexpected error occurred: {str(e)}")
+

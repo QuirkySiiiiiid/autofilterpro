@@ -7,7 +7,7 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, 
 async def jsonify(_, message):
     the_real_message = None
     reply_to_id = None
-    pk = InlineKeyboardMarkup([[InlineKeyboardButton(text="𝙲𝙻𝙾𝚂𝙴", callback_data="close_data")]])             
+    pk = InlineKeyboardMarkup([[InlineKeyboardButton(text="• Cʟᴏsᴇ •", callback_data="close_data")]])             
     if message.reply_to_message:
         the_real_message = message.reply_to_message
     else:

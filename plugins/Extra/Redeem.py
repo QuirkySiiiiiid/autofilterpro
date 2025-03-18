@@ -24,7 +24,7 @@ class RedeemDB:
         
         # Create indexes
         self.col_redeem.create_index("code", unique=True)
-        self.col_redeem.create_index("created_at", expireAfterSeconds=30*24*60*60)  # 30 days TTL
+        self.col_redeem.create_index("expires_at", expireAfterSeconds=30*24*60*60)  # 30 days TTL
         self.col_cooldown.create_index("user_id", unique=True)
         self.col_notifications.create_index("notification_time")
 

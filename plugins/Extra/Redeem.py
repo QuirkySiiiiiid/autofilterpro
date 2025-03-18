@@ -11,14 +11,17 @@ from utils import get_seconds, temp
 
 PREMIUM_IMAGE = "https://i.ibb.co/BVLLb42X/Black-and-White-Simple-Minimalist-Special-Gift-Voucher-Certificate.jpg"
 
-# Database Collections
-redeem_codes: AsyncIOMotorCollection = db["redeem_codes"]
-redeem_cooldown: AsyncIOMotorCollection = db["redeem_cooldown"]
-users: AsyncIOMotorCollection = db["users"]
+# Database helper functions
+async def get_collection(name: str):
+    """Get a collection by name"""
+    return db.db[name]  # Access the MongoDB database properly
 
 async def init_database():
     """Initialize database indexes"""
     try:
+        redeem_codes = await get_collection("redeem_codes")
+        redeem_cooldown = await get_collection("redeem_cooldown")
+        
         # Create indexes
         await redeem_codes.create_index("code", unique=True)
         await redeem_codes.create_index("created_at", expireAfterSeconds=7*24*60*60)
@@ -31,6 +34,7 @@ async def init_database():
 async def store_redeem_code(code: str, time: str, admin_id: int) -> bool:
     """Store a new redeem code"""
     try:
+        redeem_codes = await get_collection("redeem_codes")
         await redeem_codes.insert_one({
             "code": code,
             "time": time,
@@ -47,6 +51,7 @@ async def store_redeem_code(code: str, time: str, admin_id: int) -> bool:
 async def get_redeem_code(code: str):
     """Get redeem code details"""
     try:
+        redeem_codes = await get_collection("redeem_codes")
         return await redeem_codes.find_one({"code": code, "active": True})
     except Exception as e:
         print(f"Error getting code: {e}")
@@ -55,6 +60,7 @@ async def get_redeem_code(code: str):
 async def mark_code_used(code: str, user_id: int) -> bool:
     """Mark a code as used by a user"""
     try:
+        redeem_codes = await get_collection("redeem_codes")
         result = await redeem_codes.update_one(
             {"code": code, "active": True},
             {"$addToSet": {"used_by": user_id}}
@@ -67,6 +73,7 @@ async def mark_code_used(code: str, user_id: int) -> bool:
 async def get_user_cooldown(user_id: int):
     """Get user's cooldown status"""
     try:
+        redeem_cooldown = await get_collection("redeem_cooldown")
         return await redeem_cooldown.find_one({"user_id": user_id})
     except Exception as e:
         print(f"Error getting cooldown: {e}")
@@ -75,6 +82,7 @@ async def get_user_cooldown(user_id: int):
 async def set_user_cooldown(user_id: int) -> bool:
     """Set cooldown for a user"""
     try:
+        redeem_cooldown = await get_collection("redeem_cooldown")
         cooldown_time = datetime.now(pytz.utc) + timedelta(minutes=10)
         await redeem_cooldown.update_one(
             {"user_id": user_id},
@@ -111,7 +119,7 @@ async def verify_code_storage(code, time, admin_id):
     try:
         await store_redeem_code(code, time, admin_id)
         # Verify storage
-        stored_code = await redeem_codes.find_one({"code": code})
+        stored_code = await get_collection("redeem_codes").find_one({"code": code})
         if not stored_code:
             raise Exception("Code storage verification failed")
         return True
@@ -242,7 +250,7 @@ async def redeem_code(client, message):
             if cooldown:
                 # Verify cooldown data
                 if not isinstance(cooldown.get("cooldown_until"), datetime):
-                    await redeem_cooldown.delete_one({"user_id": user_id})
+                    await get_collection("redeem_cooldown").delete_one({"user_id": user_id})
                     cooldown = None
                 
             if cooldown and cooldown["cooldown_until"] > datetime.now(pytz.utc):
@@ -277,7 +285,7 @@ async def redeem_code(client, message):
                 return
 
             # Check current premium status
-            data = await users.find_one({"id": user_id})
+            data = await get_collection("users").find_one({"id": user_id})
             current_expiry = data.get("expiry_time") if data else None
             now_aware = datetime.now(pytz.utc)
 
@@ -293,7 +301,7 @@ async def redeem_code(client, message):
 
             # Activate premium
             expiry_time = now_aware + timedelta(seconds=seconds)
-            await users.update_one({"id": user_id}, {"$set": {"expiry_time": expiry_time}})
+            await get_collection("users").update_one({"id": user_id}, {"$set": {"expiry_time": expiry_time}})
             await mark_code_used(redeem_code, user_id)
             await set_user_cooldown(user_id)
 
@@ -335,8 +343,8 @@ async def redeem_code(client, message):
             # Add verification for premium activation
             try:
                 # Verify user update
-                await users.update_one({"id": user_id}, {"$set": {"expiry_time": expiry_time}})
-                verify_update = await users.find_one({"id": user_id})
+                await get_collection("users").update_one({"id": user_id}, {"$set": {"expiry_time": expiry_time}})
+                verify_update = await get_collection("users").find_one({"id": user_id})
                 if not verify_update or not verify_update.get("expiry_time"):
                     raise Exception("Failed to verify premium activation")
 
@@ -365,7 +373,7 @@ async def redeem_code(client, message):
 # Admin commands
 @Client.on_message(filters.command("list_codes") & filters.user(ADMINS))
 async def list_codes(client, message):
-    codes = await redeem_codes.find({"active": True}).to_list(None)
+    codes = await get_collection("redeem_codes").find({"active": True}).to_list(None)
     if not codes:
         await message.reply_text("No active codes found.")
         return
@@ -385,7 +393,7 @@ async def revoke_code(client, message):
         return
         
     code = message.command[1]
-    result = await redeem_codes.update_one(
+    result = await get_collection("redeem_codes").update_one(
         {"code": code, "active": True},
         {"$set": {"active": False}}
     )

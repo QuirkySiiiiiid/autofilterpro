@@ -99,6 +99,6 @@ async def vr_ref(client, query):
         await query.message.edit("✅ **#verification**\n\nTᴏᴛᴀʟ ᴠᴇʀɪғɪᴇᴅ ᴜsᴇʀs", reply_markup=InlineKeyboardMarkup(btn))
     except MessageNotModified:
         pass
-    await query.answer("Rᴇғʀᴇsʜɪɴɢ_ᴅᴀᴛᴀ ✅......")
+    await query.answer("<i>Rᴇғʀᴇsʜɪɴɢ_ᴅᴀᴛᴀ ✅....</i>")
 
   

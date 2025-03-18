@@ -1,4 +1,3 @@
-
 from pyrogram import Client, filters, enums
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from pyrogram.errors.exceptions.bad_request_400 import MessageTooLong, PeerIdInvalid
@@ -9,8 +8,9 @@ from utils import get_size, temp, get_settings
 from Script import script
 from pyrogram.errors import ChatAdminRequired
 import asyncio 
+import os
 
-"""-----------------------------------------https://t.me/codeflix_bots--------------------------------------"""
+"""-----------------------------------------https://t.me/Moviess_Ok--------------------------------------"""
 
 @Client.on_message(filters.new_chat_members & filters.group)
 async def save_group(bot, message):
@@ -24,7 +24,7 @@ async def save_group(bot, message):
         if message.chat.id in temp.BANNED_CHATS:
             # Inspired from a boat of a banana tree
             buttons = [[
-                InlineKeyboardButton('• ᴄᴏɴᴛᴀᴄᴛ ꜱᴜᴘᴘᴏʀᴛ •', url=f'https://t.me/codeflixsupport')
+                InlineKeyboardButton('• ᴄᴏɴᴛᴀᴄᴛ ꜱᴜᴘᴘᴏʀᴛ •', url=f'https://t.me/Anime106_Request_bot')
             ]]
             reply_markup=InlineKeyboardMarkup(buttons)
             k = await message.reply(
@@ -39,8 +39,8 @@ async def save_group(bot, message):
             await bot.leave_chat(message.chat.id)
             return
         buttons = [[
-                    InlineKeyboardButton('sᴜᴘᴘᴏʀᴛ', url='https://telegram.me/codeflixsupport'),
-                    InlineKeyboardButton('ᴜᴘᴅᴀᴛᴇꜱ', url='https://telegram.me/codeflix_bots')
+                    InlineKeyboardButton('sᴜᴘᴘᴏʀᴛ', url='https://telegram.me/+hc1ZQg8SelMzZGY9'),
+                    InlineKeyboardButton('ᴜᴘᴅᴀᴛᴇꜱ', url='https://telegram.me/Moviess_Ok')
                   ]]
         reply_markup=InlineKeyboardMarkup(buttons)
         await message.reply_text(
@@ -60,7 +60,7 @@ async def save_group(bot, message):
                                                  caption=(script.MELCOW_ENG.format(u.mention, message.chat.title)),
                                                  reply_markup=InlineKeyboardMarkup(
                                                                          [[
-                                                                           InlineKeyboardButton('• ᴊᴏɪɴ ᴍʏ ᴜᴘᴅᴀᴛᴇs •', url='https://t.me/codeflix_bots')
+                                                                           InlineKeyboardButton('• ᴊᴏɪɴ ᴍʏ ᴜᴘᴅᴀᴛᴇs •', url='https://telegram.me/+hc1ZQg8SelMzZGY9')
                                                                          ]]
                                                  ),
                                                  parse_mode=enums.ParseMode.HTML
@@ -85,7 +85,7 @@ async def leave_a_chat(bot, message):
         chat = chat
     try:
         buttons = [[
-                  InlineKeyboardButton('sᴜᴘᴘᴏʀᴛ', url='https://telegram.me/codeflixsupport')
+                  InlineKeyboardButton('sᴜᴘᴘᴏʀᴛ', url='https://telegram.me/+hc1ZQg8SelMzZGY9')
                   ]]
         reply_markup=InlineKeyboardMarkup(buttons)
         await bot.send_message(
@@ -124,7 +124,7 @@ async def disable_chat(bot, message):
     await message.reply('Chat Successfully Disabled')
     try:
         buttons = [[
-            InlineKeyboardButton('sᴜᴘᴘᴏʀᴛ', url='https://telegram.me/codeflixsupport')
+            InlineKeyboardButton('sᴜᴘᴘᴏʀᴛ', url='https://telegram.me/+hc1ZQg8SelMzZGY9')
         ]]
         reply_markup=InlineKeyboardMarkup(buttons)
         await bot.send_message(
@@ -157,16 +157,18 @@ async def re_enable_chat(bot, message):
 
 @Client.on_message(filters.command('stats') & filters.incoming)
 async def get_ststs(bot, message):
-    if message.from_user.id not in ADMINS:  # You need to define ADMINS
-        m=await message.reply_sticker("CAACAgUAAxkBAAJFeWd037UWP-vgb_dWo55DCPZS9zJzAAJpEgACqXaJVxBrhzahNnwSHgQ") 
-        await asyncio.sleep(2)
+    if message.from_user.id not in ADMINS:
+        # For non-admins, show sticker and delete
+        m = await message.reply_sticker("CAACAgUAAxkBAAENwX1nqY2wtMmpwC8nVNR4Fsknd_nHfwACLggAAqNaIFSTNRxwL22HDzYE")
+        await asyncio.sleep(10)  # Wait for 10 seconds
         await m.delete()
-        sticker_file_id = "CAACAgUAAxkBAAJFeWd037UWP-vgb_dWo55DCPZS9zJzAAJpEgACqXaJVxBrhzahNnwSHgQ"  # Replace with your sticker file ID
-        d = await message.reply_sticker(sticker=sticker_file_id)
-        await asyncio.sleep(15)
-        await d.delete()
-    else:
-        rju = await message.reply('Fetching stats..')
+        return
+        
+    try:
+        # For admins, show loading sticker first
+        status = await message.reply_sticker("CAACAgIAAxkBAAEOEGFn0Vo1dhWHq37XzE_neCUx9VBKUQACFBIAAto4aUh6lAJQnkvJtTYE")
+        
+        # Get stats
         total_users = await db.total_users_count()
         totl_chats = await db.total_chat_count()
         files = await Media.count_documents()
@@ -174,8 +176,36 @@ async def get_ststs(bot, message):
         free = 536870912 - size
         size = get_size(size)
         free = get_size(free)
-        await rju.edit(script.STATUS_TXT.format(files, total_users, totl_chats, size, free))
+        
+        # Wait for 15 seconds showing the sticker
+        await asyncio.sleep(15)
+        
+        # Format the stats text
+        stats_text = f"""
+📊 <b>Current Database Stats:</b>
 
+<b>• Total Users:</b> <code>{total_users}</code>
+<b>• Total Groups:</b> <code>{totl_chats}</code>
+<b>• Total Files:</b> <code>{files}</code>
+<b>• Used Storage:</b> <code>{size}</code>
+<b>• Free Storage:</b> <code>{free}</code>
+"""
+        # Replace sticker with stats text
+        await status.delete()
+        await message.reply_text(stats_text)
+            
+    except Exception as e:
+        await message.reply_text(f"Error fetching stats: {str(e)}")
+
+# Helper function to format size
+def get_size(size):
+    units = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB"]
+    size = float(size)
+    i = 0
+    while size >= 1024.0 and i < len(units):
+        i += 1
+        size /= 1024.0
+    return "%.2f %s" % (size, units[i])
 
 @Client.on_message(filters.command('invite') & filters.user(ADMINS))
 async def gen_invite(bot, message):
@@ -263,21 +293,50 @@ async def unban_a_user(bot, message):
     
 @Client.on_message(filters.command('users') & filters.user(ADMINS))
 async def list_users(bot, message):
-    # https://t.me/GetTGLink/4184
-    raju = await message.reply('Getting List Of Users')
+    # Send initial status
+    raju = await message.reply('📊 Getting List Of Users...')
     users = await db.get_all_users()
-    out = "Users Saved In DB Are:\n\n"
+    out = """<b>📑 Users in Database:</b>
+    
+<code>ID        | Status    | Username/Name</code>
+<code>-------------------------------</code>
+"""
     async for user in users:
-        out += f"<a href=tg://user?id={user['id']}>{user['name']}</a>"
+        # Get user status
+        status = "⛔️ Banned" if user['ban_status']['is_banned'] else "✅ Active"
+        
+        # Format user info
+        try:
+            # Try to get full user info
+            user_obj = await bot.get_users(user['id'])
+            username = f"@{user_obj.username}" if user_obj.username else user_obj.first_name
+        except:
+            # Fallback to stored name if can't get current info
+            username = user['name']
+            
+        # Format line with fixed width
+        line = f"\n<code>{user['id']:<9} | {status:<9} | </code>{username}"
+        
+        # Add ban reason if banned
         if user['ban_status']['is_banned']:
-            out += '( Banned User )'
-        out += '\n'
+            line += f"\n<code>Ban Reason:</code> <i>{user['ban_status']['ban_reason']}</i>\n"
+            
+        out += line
+
     try:
-        await raju.edit_text(out)
+        # Try to edit with full list
+        await raju.edit_text(out, parse_mode=enums.ParseMode.HTML)
     except MessageTooLong:
-        with open('users.txt', 'w+') as outfile:
+        # If too long, create file
+        with open('users.txt', 'w+', encoding='utf-8') as outfile:
             outfile.write(out)
-        await message.reply_document('users.txt', caption="List Of Users")
+        await raju.delete()
+        await message.reply_document(
+            'users.txt',
+            caption="📊 List Of Users In Database",
+            parse_mode=enums.ParseMode.HTML
+        )
+        os.remove('users.txt')
 
 @Client.on_message(filters.command('chats') & filters.user(ADMINS))
 async def list_chats(bot, message):

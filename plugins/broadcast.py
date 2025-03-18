@@ -1,49 +1,230 @@
 import datetime, time, os, asyncio,logging 
 from pyrogram.errors import InputUserDeactivated, UserNotParticipant, FloodWait, UserIsBlocked, PeerIdInvalid
 from pyrogram.errors.exceptions.bad_request_400 import MessageTooLong, PeerIdInvalid
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram import Client, filters, enums
 from database.users_chats_db import db
 from info import ADMINS, GRP_LNK
+from itertools import cycle
 
-        
+# Loading animation frames
+LOADING_CHARS = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+loading_animation = cycle(LOADING_CHARS)
+
+def get_progress_bar(current, total, length=10):
+    progress = (current / total) * length
+    filled = int(progress)
+    remaining = length - filled
+    percent = (current / total) * 100
+    return f"[{'█' * filled}{'░' * remaining}] {percent:.1f}% {next(loading_animation)}"
+
+async def update_progress_message(message, current, total, stats):
+    try:
+        progress_text = get_progress_bar(current, total)
+        status_text = f"""
+<b>⚡ Broadcast Status</b>
+
+<code>{progress_text}</code>
+
+<b>💫 Progress:</b> <code>{current}/{total}</code>
+<b>✅ Successful:</b> <code>{stats['successful']}</code>
+<b>🚫 Blocked:</b> <code>{stats['blocked']}</code>
+<b>🗑 Deleted:</b> <code>{stats['deleted']}</code>
+<b>❌ Failed:</b> <code>{stats['failed']}</code>
+
+<i>Processing...</i>
+"""
+        await message.edit(status_text)
+    except Exception as e:
+        print(f"Error updating progress: {e}")
+
+async def pin_broadcast_message(client, user_ids, message):
+    """Pin broadcast message for all successful users silently"""
+    pinned = 0
+    failed = 0
+    
+    for user_id in user_ids:
+        try:
+            sent_msg = await message.copy(chat_id=user_id)
+            await sent_msg.pin(disable_notification=True)  # Silent pin
+            pinned += 1
+            await asyncio.sleep(0.1)  # Prevent flooding
+        except Exception as e:
+            print(f"Failed to pin for {user_id}: {str(e)}")
+            failed += 1
+    
+    return pinned, failed
+
 @Client.on_message(filters.command("broadcast") & filters.user(ADMINS) & filters.reply)
-async def broadcast(bot, message):
+async def broadcast_handler(bot, message):
+    """Broadcast to all users with pin option"""
     users = await db.get_all_users()
-    b_msg = message.reply_to_message
-    sts = await message.reply_text('Bʀᴏᴀᴅᴄᴀsᴛɪɴɢ Yᴏᴜʀ Mᴇssᴀɢᴇs...')
-    start_time = time.time()
+    reply_message = message.reply_to_message
+    
+    if not reply_message:
+        return await message.reply_text("❌ Please reply to a message to broadcast!")
+
+    # Initialize broadcast
+    start_time = datetime.datetime.now()
+    status_msg = await message.reply_text("⚡ Initializing broadcast...")
+    
     total_users = await db.total_users_count()
     done = 0
-    blocked = 0
-    deleted = 0
-    failed =0
-    success = 0
-    btn = InlineKeyboardMarkup([[InlineKeyboardButton(" Sᴇᴀʀᴄʜ ʜᴇʀᴇ", url=GRP_LNK)]])
+    successful_users = []  # Store successful user IDs
+    stats = {
+        "successful": 0,
+        "blocked": 0,
+        "deleted": 0,
+        "failed": 0
+    }
+    
     async for user in users:
-        pti, sh = await broadcast_messages(int(user['id']), b_msg, reply_markup=btn)
-        if pti:
-            success += 1
-        elif pti == False:
-            if sh == "Blocked":
-                blocked+=1
-            elif sh == "Deleted":
-                deleted += 1
-            elif sh == "Error":
-                failed += 1
-        done += 1
-        if not done % 20:
-            await sts.edit(f"Bʀᴏᴀᴅᴄᴀsᴛ Iɴ Pʀᴏɢʀᴇss:\n\nTᴏᴛᴀʟ Uꜱᴇʀꜱ {total_users}\nCᴏᴍᴩʟᴇᴛᴇᴅ: {done} / {total_users}\nSᴜᴄᴄᴇꜱꜱ: {success}\nBʟᴏᴄᴋᴇᴅ: {blocked}\nDᴇʟᴇᴛᴇᴅ: {deleted}")    
-    time_taken = datetime.timedelta(seconds=int(time.time()-start_time))
-    await sts.delete()
-    await bot.send_message(message.chat.id, f"Bʀᴏᴀᴅᴄᴀsᴛ Coᴍᴩʟᴇᴛᴇᴅ:\nTɪᴍᴇ Tᴀᴋᴇᴅ{time_taken} Sᴇᴄ\n\nTᴏᴛᴀʟ Uꜱᴇʀꜱ: {total_users}\nCᴏᴍᴩʟᴇᴛᴇᴅ: {done} / {total_users}\nSucᴄᴇꜱꜱ: {success}\nBʟᴏᴄᴋᴇᴅ: {blocked}\nDᴇʟᴇᴛᴇᴅ: {deleted}")
+        try:
+            pti, sh = await broadcast_messages(int(user['id']), reply_message, None)
+            if pti:
+                stats['successful'] += 1
+                successful_users.append(int(user['id']))
+            else:
+                if sh == "Deleted/Blocked":
+                    stats['blocked'] += 1
+                else:
+                    stats['failed'] += 1
+            
+            done += 1
+            if not done % 20:  # Update every 20 messages
+                await update_progress_message(status_msg, done, total_users, stats)
+                
+        except Exception as e:
+            stats['failed'] += 1
+            print(f"Broadcast Error: {e}")
+        
+        await asyncio.sleep(0.1)
 
+    time_taken = datetime.datetime.now() - start_time
+    
+    # Final status with pin option
+    buttons = InlineKeyboardMarkup([
+        [InlineKeyboardButton("📌 Pin Broadcast", callback_data="pin_broadcast")],
+        [InlineKeyboardButton("❌ Close", callback_data="close_broadcast")]
+    ])
+    
+    final_status = f"""
+<b>✅ Broadcast Completed!</b>
+
+[██████████] 100% ✓
+
+<b>⏰ Time Taken:</b> <code>{time_taken.seconds} seconds</code>
+<b>👥 Total Users:</b> <code>{total_users}</code>
+<b>✅ Successful:</b> <code>{stats['successful']}</code>
+<b>🚫 Blocked:</b> <code>{stats['blocked']}</code>
+<b>❌ Failed:</b> <code>{stats['failed']}</code>
+
+<i>Use buttons below to pin broadcast or close this message.</i>
+"""
+    # Store context for pin operation
+    context = {
+        "successful_users": successful_users,
+        "broadcast_message": reply_message
+    }
+    await status_msg.edit(final_status, reply_markup=buttons)
+    return context
+
+@Client.on_callback_query(filters.regex("^pin_broadcast"))
+async def pin_broadcast_callback(bot, query):
+    try:
+        await query.answer("Starting to pin broadcast messages...")
+        status_msg = await query.message.edit_text("📌 Pinning broadcast messages...", reply_markup=None)
+        
+        # Get context from stored data
+        context = query.message.context  # You'll need to store this during broadcast
+        
+        pinned, failed = await pin_broadcast_message(
+            bot,
+            context["successful_users"],
+            context["broadcast_message"]
+        )
+        
+        await status_msg.edit(f"""
+<b>📌 Broadcast Pin Complete!</b>
+
+✅ Successfully Pinned: <code>{pinned}</code>
+❌ Failed to Pin: <code>{failed}</code>
+
+<i>Messages have been silently pinned.</i>
+""")
+    except Exception as e:
+        await query.message.edit_text(f"❌ Error during pinning: {str(e)}")
+
+@Client.on_callback_query(filters.regex("^close_broadcast"))
+async def close_broadcast_callback(bot, query):
+    try:
+        await query.message.delete()
+    except Exception as e:
+        print(f"Error closing broadcast message: {str(e)}")
+
+@Client.on_message(filters.command("groupcast") & filters.user(ADMINS) & filters.reply)
+async def group_broadcast(bot, message):
+    """Broadcast to all groups"""
+    chats = await db.get_all_chats()
+    reply_message = message.reply_to_message
+    
+    if not reply_message:
+        return await message.reply_text("❌ Please reply to a message to broadcast!")
+
+    # Initialize broadcast
+    start_time = datetime.datetime.now()
+    status_msg = await message.reply_text("⚡ Initializing group broadcast...")
+    
+    total_chats = await db.total_chat_count()
+    done = 0
+    stats = {
+        "successful": 0,
+        "blocked": 0,
+        "deleted": 0,
+        "failed": 0
+    }
+    
+    async for chat in chats:
+        try:
+            pti, sh = await broadcast_messages(int(chat['id']), reply_message, None)
+            if pti:
+                stats['successful'] += 1
+            else:
+                if sh == "Deleted/Blocked":
+                    stats['deleted'] += 1
+                else:
+                    stats['failed'] += 1
+            
+            done += 1
+            if not done % 20:
+                await update_progress_message(status_msg, done, total_chats, stats)
+                
+        except Exception as e:
+            stats['failed'] += 1
+            print(f"Group Broadcast Error: {e}")
+        
+        await asyncio.sleep(0.1)
+
+    time_taken = datetime.datetime.now() - start_time
+    
+    final_status = f"""
+<b>✅ Group Broadcast Completed!</b>
+
+[██████████] 100% ✓
+
+<b>⏰ Time Taken:</b> <code>{time_taken.seconds} seconds</code>
+<b>👥 Total Groups:</b> <code>{total_chats}</code>
+<b>✅ Successful:</b> <code>{stats['successful']}</code>
+<b>🗑 Deleted:</b> <code>{stats['deleted']}</code>
+<b>❌ Failed:</b> <code>{stats['failed']}</code>
+"""
+    await status_msg.edit(final_status)
 
 @Client.on_message(filters.command("clear_junk") & filters.user(ADMINS))
 async def remove_junkuser__db(bot, message):
     users = await db.get_all_users()
     b_msg = message 
-    sts = await message.reply_text('IN PROGRESS.......')   
+    sts = await message.reply_text('<i>In Progress...</i>')   
     start_time = time.time()
     total_users = await db.total_users_count()
     blocked = 0
@@ -216,93 +397,3 @@ async def broadcast_messages(user_id, message, reply_markup=None):
         return False, "Error"
     except Exception as e:
         return False, "Error"
-
-@Client.on_message(filters.command("smartcast") & filters.user(ADMINS) & filters.reply)
-async def smart_broadcast(bot, message):
-    b_msg = message.reply_to_message
-    # Create inline keyboard with only pin option
-    buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📌 Broadcast & Pin Message", callback_data="broadcast_pin")]
-    ])
-    await message.reply_text(
-        "Smart Broadcast\n\n"
-        "This will broadcast and pin the message to all users.\n"
-        "For regular broadcast without pin, use /broadcast command.", 
-        reply_markup=buttons
-    )
-
-@Client.on_callback_query(filters.regex('^broadcast_pin'))
-async def broadcast_callback(bot, query: CallbackQuery):
-    users = await db.get_all_users()
-    b_msg = query.message.reply_to_message
-    
-    sts = await query.message.edit_text('📤 Broadcasting and pinning your message...')
-    start_time = time.time()
-    total_users = await db.total_users_count()
-    done = 0
-    blocked = 0
-    deleted = 0
-    failed = 0
-    success = 0
-    
-    async for user in users:
-        pti, sh = await broadcast_and_pin(int(user['id']), b_msg)
-        if pti:
-            success += 1
-        elif pti == False:
-            if sh == "Blocked":
-                blocked += 1
-            elif sh == "Deleted":
-                deleted += 1
-            elif sh == "Error":
-                failed += 1
-        done += 1
-        
-        if not done % 20:
-            await sts.edit(
-                f"📤 Smart Broadcast Progress:\n\n"
-                f"Total Users: {total_users}\n"
-                f"Completed: {done}/{total_users}\n"
-                f"Success: {success}\n"
-                f"Blocked: {blocked}\n"
-                f"Deleted: {deleted}"
-            )
-    
-    time_taken = datetime.timedelta(seconds=int(time.time()-start_time))
-    await sts.delete()
-    await bot.send_message(
-        query.message.chat.id,
-        f"📤 Smart Broadcast Completed\n"
-        f"Time Taken: {time_taken}\n\n"
-        f"Total Users: {total_users}\n"
-        f"Completed: {done}/{total_users}\n"
-        f"Success: {success}\n"
-        f"Blocked: {blocked}\n"
-        f"Deleted: {deleted}"
-    )
-
-async def broadcast_and_pin(user_id, message):
-    try:
-        sent_message = await message.copy(chat_id=user_id)
-        try:
-            await sent_message.pin(disable_notification=True)
-        except:
-            pass
-        return True, "Success"
-    except FloodWait as e:
-        await asyncio.sleep(e.value)
-        return await broadcast_and_pin(user_id, message)
-    except (InputUserDeactivated, UserIsBlocked, PeerIdInvalid):
-        await db.delete_user(int(user_id))
-        return False, "Deleted/Blocked"
-    except Exception:
-        return False, "Error"
-
-
-
-
-
-
-
-
-

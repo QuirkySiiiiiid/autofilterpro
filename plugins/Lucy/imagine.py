@@ -49,114 +49,90 @@ async def mute_user(client, chat_id, user_id, duration_minutes):
     except Exception as e:
         return False, str(e)
 
-@Client.on_message(filters.command(['imagine', 'generate']))
-async def generate_image(client, message):
+# Add proper timeout and error handling for API requests
+def generate_image(prompt):
     try:
-        # Check if prompt is provided
-        if len(message.command) < 2:
-            await message.reply_text("Please provide a prompt!\nExample: `/imagine a beautiful sunset`")
-            return
-
-        # Get the prompt and user info
-        prompt = ' '.join(message.command[1:])
-        user_id = message.from_user.id
-        chat_id = message.chat.id
-        
-        # Check for adult content
-        if await check_adult_content(prompt):
-            # Check user's warning status
-            if user_id not in user_warnings:
-                user_warnings[user_id] = {
-                    'count': 1,
-                    'last_warning': datetime.now()
-                }
-                await message.reply_text(
-                    "⚠️ **WARNING:** Adult content is not allowed!\n"
-                    "This is your first warning. Next violation will result in a mute."
-                )
-                return
-            else:
-                # Calculate mute duration
-                duration = await get_mute_duration(user_id)
-                
-                # Mute the user
-                success, result = await mute_user(client, chat_id, user_id, duration)
-                
-                if success:
-                    await message.reply_text(
-                        f"🚫 **MUTED:** User has been muted for {result} minutes for "
-                        "repeatedly attempting to generate adult content."
-                    )
-                else:
-                    await message.reply_text(f"Failed to mute user: {result}")
-                return
-
-        # Send typing action
-        await client.send_chat_action(message.chat.id, ChatAction.TYPING)
-        
-        # Send a message to inform the user to wait
-        wait_message = await message.reply_text("🎨 Generating your image, please wait...")
-        StartTime = time.time()
-
-        # Updated Lexica API endpoint and headers
-        url = "https://api.lexica.art/v2/generate"
-        
         headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
+            "Content-Type": "application/json"
         }
         
         data = {
             "prompt": prompt,
-            "model": "lexica",  # or "stable-diffusion"
-            "width": 512,
-            "height": 512,
-            "guidance_scale": 7.5,
-            "num_inference_steps": 50,
-            "seed": int(time.time())  # Random seed
+            "model": "stable-diffusion-xl-v1-0",
+            "negative_prompt": "",
+            "width": 1024,
+            "height": 1024,
+            "steps": 50,
+            "n_samples": 1,
+            "safety_check": True
         }
 
-        # Send request to the API
-        response = requests.post(url, headers=headers, json=data, timeout=60)
-
-        if response.status_code == 200:
-            try:
-                result = response.json()
-                if 'images' in result and len(result['images']) > 0:
-                    image_url = result['images'][0]['url']
-                    
-                    # Download the image
-                    img_response = requests.get(image_url)
-                    if img_response.status_code == 200:
-                        # Save temporarily
-                        with open('generated_image.jpg', 'wb') as f:
-                            f.write(img_response.content)
-                        
-                        # Send the image
-                        await message.reply_photo(
-                            'generated_image.jpg',
-                            caption=f"🎨 **Prompt:** {prompt}\n⏱️ **Time Taken:** {round(time.time() - StartTime, 1)}s"
-                        )
-                        
-                        # Clean up
-                        os.remove('generated_image.jpg')
-                    else:
-                        await wait_message.edit_text("❌ Failed to download the generated image.")
-                else:
-                    await wait_message.edit_text("❌ No image was generated.")
-            except Exception as e:
-                await wait_message.edit_text(f"❌ Error processing the image: {str(e)}")
-        else:
-            await wait_message.edit_text(f"❌ API Error: {response.status_code} - {response.text}")
+        # Add timeout and proper error handling
+        response = requests.post(
+            "https://api.lexica.art/v2/generate",
+            headers=headers,
+            json=data,
+            timeout=30  # 30 seconds timeout
+        )
         
-        # Delete wait message if it still exists
-        try:
-            await wait_message.delete()
-        except:
-            pass
-
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise Exception(f"API returned status code {response.status_code}")
+            
+    except requests.exceptions.Timeout:
+        raise Exception("Request timed out. Please try again.")
+    except requests.exceptions.ConnectionError:
+        raise Exception("Connection error. Please check your internet connection.")
     except Exception as e:
-        await message.reply_text(f"❌ An error occurred: {str(e)}")
+        raise Exception(f"Error generating image: {str(e)}")
+
+@Client.on_message(filters.command(["imagine", "generate"]))
+async def imagine_image(client, message):
+    try:
+        # Get the prompt
+        if len(message.command) < 2:
+            await message.reply_text("Please provide a prompt after the command.")
+            return
+            
+        prompt = " ".join(message.command[1:])
+        
+        # Check for adult content
+        if await check_adult_content(prompt):
+            await message.reply_text("❌ Adult/NSFW content is not allowed.")
+            return
+
+        # Send "generating" message
+        status_message = await message.reply_text("🎨 Generating your image, please wait...")
+        
+        try:
+            # Show typing action
+            await client.send_chat_action(message.chat.id, ChatAction.TYPING)
+            
+            # Generate image
+            result = generate_image(prompt)
+            
+            if not result or 'images' not in result:
+                raise Exception("Failed to generate image")
+                
+            # Get the image URL
+            image_url = result['images'][0]['url']
+            
+            # Download and send image
+            await client.send_chat_action(message.chat.id, ChatAction.UPLOAD_PHOTO)
+            await message.reply_photo(
+                photo=image_url,
+                caption=f"🎨 Generated image for: {prompt}"
+            )
+            
+        except Exception as e:
+            await message.reply_text(f"Failed to generate image: {str(e)}")
+        finally:
+            # Delete the status message
+            await status_message.delete()
+            
+    except Exception as e:
+        await message.reply_text(f"An error occurred: {str(e)}")
 
 # Command to check user's warning status
 @Client.on_message(filters.command(['warnings']))

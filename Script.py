@@ -1,17 +1,17 @@
 class script(object):
-    START_TXT = """<b>ʜᴇʏ {}, {}\n\nɪ ᴀᴍ ᴛʜᴇ ᴍᴏꜱᴛ ᴘᴏᴡᴇʀꜰᴜʟ ᴀᴜᴛᴏ ꜰɪʟᴛᴇʀ ʙᴏᴛ ᴡɪᴛʜ ᴘʀᴇᴍɪᴜᴍ ꜰᴇᴀᴛᴜʀᴇꜱ, ᴊᴜsᴛ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ ᴀɴᴅ ᴇɴᴊᴏʏ!\n\n<blockquote>‣ ᴍᴀɪɴᴛᴀɪɴᴇᴅ ʙʏ : <a href="https://t.me/Anime106_Request_bot">Sɪɪɪɪɪɪᴅ</a></blockquote></b>"""
+    START_TXT = """<b>ʜᴇʏ {}, {}\n\nɪ ᴀᴍ ᴛʜᴇ ᴍᴏꜱᴛ ᴘᴏᴡᴇʀꜰᴜʟ ᴀᴜᴛᴏ ꜰɪʟᴛᴇʀ ʙᴏᴛ ᴡɪᴛʜ ᴘʀᴇᴍɪᴜᴍ ꜰᴇᴀᴛᴜʀᴇꜱ, ᴊᴜsᴛ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ ᴀɴᴅ ᴇɴᴊᴏʏ!\n\n<blockquote>‣ ᴍᴀɪɴᴛᴀɪɴᴇᴅ ʙʏ : <a href="https://t.me/Anime106_Request_bot">Sɪɪɪɪɪɪᴅ</a></blockquote></b>\n\n<bloekquote expandable> ⤷ Oᴛʜᴇʀ Wᴏʀᴋɪɴɢ Bᴏᴛs\n Iɴsᴛᴀ Dᴏᴡɴʟᴏᴀᴅᴇʀ @InstaGrSaverBot Oʀ ʏᴏᴜ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ʙᴏᴛ ᴛᴏᴏ\n Aᴅᴠᴀɴᴄᴇ Fɪʟᴇ Sᴛᴏʀᴇ ʙᴏᴛ @Zoro_filebot \nCᴏɴᴛᴀᴄᴛ Aᴅᴍɪɴ ❝ @Anime106_Request_bot</bloekquote></b>"""
 
-    GSTART_TXT = """<b>ʜᴇʏ {}, {}\n\nɪ ᴀᴍ ᴛʜᴇ ᴍᴏꜱᴛ ᴘᴏᴡᴇʀꜰᴜʟ ᴀᴜᴛᴏ ꜰɪʟᴛᴇʀ ʙᴏᴛ ᴡɪᴛʜ ᴘʀᴇᴍɪᴜᴍ ꜰᴇᴀᴛᴜʀᴇꜱ, ᴊᴜsᴛ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ ᴀɴᴅ ᴇɴᴊᴏʏ!\n\n<blockquote>‣ ᴍᴀɪɴᴛᴀɪɴᴇᴅ ʙʏ : <a href="https://t.me/codeflix_bots">ʏᴀᴛᴏ</a></blockquote></b>"""
+    GSTART_TXT = """<b>ʜᴇʏ {}, {}\n\nɪ ᴀᴍ ᴛʜᴇ ᴍᴏꜱᴛ ᴘᴏᴡᴇʀꜰᴜʟ ᴀᴜᴛᴏ ꜰɪʟᴛᴇʀ ʙᴏᴛ ᴡɪᴛʜ ᴘʀᴇᴍɪᴜᴍ ꜰᴇᴀᴛᴜʀᴇꜱ, ᴊᴜsᴛ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ ᴀɴᴅ ᴇɴᴊᴏʏ!\n\n<blockquote>‣ ᴍᴀɪɴᴛᴀɪɴᴇᴅ ʙʏ : <a href="https://t.me/Anime106_Request_bot">Sɪɪɪɪɪɪᴅ</a></blockquote></b>"""
     
     HELP_TXT = """» ᴡʜᴇʀᴇ ᴅᴏ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴏᴘᴇɴ ᴛʜᴇ sᴇᴛᴛɪɴɢs ᴍᴇɴᴜ?."""
 
-    ABOUT_TXT = """<blockquote><b>❍ ᴍʏ ɴᴀᴍᴇ : <a href="https://t.me/Lucy_Filter_bot">ʟᴜᴄʏ ʙᴏᴛ</a>
-❍ ᴄʀᴇᴀᴛᴏʀ : <a href="https://t.me/sewxiy">Subaru</a>
+    ABOUT_TXT = """<blockquote><b>❍ ᴍʏ ɴᴀᴍᴇ : <a href="https://t.me/SaitamaMovieBot">Nɪᴄᴏ Rᴏʙɪɴ (Mᴇ)</a>
+❍ ᴄʀᴇᴀᴛᴏʀ : <a href="https://t.me/Anime106_Request_bot">Sɪɪɪɪɪɪᴅ</a>
 ❍ ʟɪʙʀᴀʀʏ : <a href="https://pyrogram.org/">ᴘʏʀᴏɢʀᴀᴍ</a>
 ❍ ʟᴀɴɢᴜᴀɢᴇ : <a href="https://www.python.org/">ᴘʏᴛʜᴏɴ</a>
 ❍ ᴅᴀᴛᴀʙᴀꜱᴇ : <a href="https://www.mongodb.com/">ᴍᴏɴɢᴏ ᴅʙ</a>
-❍ ʜᴏꜱᴛᴇᴅ ᴏɴ : <a href="https://t.me/codeflix_bots">ᴠᴘs</a>
-❍ ʙᴜɪʟᴅ ꜱᴛᴀᴛᴜꜱ : ᴠ3 [ᴀᴅᴠᴀɴᴄᴇ]</blockquote>
+❍ ʜᴏꜱᴛᴇᴅ ᴏɴ : <a href="https://t.me/SaitamaMovieBot">ᴠᴘs</a>
+❍ ʙᴜɪʟᴅ ꜱᴛᴀᴛᴜꜱ : ᴠ5.1 [ᴀᴅᴠᴀɴᴄᴇ]</blockquote>
 
 ➻ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ɢɪᴠᴇɴ ʙᴇʟᴏᴡ ғᴏʀ ɢᴇᴛᴛɪɴɢ ʙᴀsɪᴄ ʜᴇʟᴩ ᴀɴᴅ ɪɴғᴏ ᴀʙᴏᴜᴛ ᴍᴇ.</b>"""
         
@@ -20,14 +20,14 @@ class script(object):
 """
 
     SUPPORT_TXT = """ᴛʜᴇsᴇ ᴀʀᴇ ᴍʏ sᴜᴘᴘᴏʀᴛ ᴄʜᴀɴɴᴇʟ ᴀɴᴅ ɢʀᴏᴜᴘ. ɪғ ᴀɴʏ ᴘʀᴏʙʟᴇᴍ, ʀᴇᴘᴏʀᴛ ᴛᴏ ᴛʜᴇ ᴀᴅᴍɪɴ
-ᴘᴏᴡᴇʀᴇᴅ ʙʏ - @codeflix_bots"""
+ᴘᴏᴡᴇʀᴇᴅ ʙʏ - @Anime106_Request_bot"""
         
     HELPS_TXT = """» ᴡʜᴇʀᴇ ᴅᴏ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴏᴘᴇɴ ᴛʜᴇ sᴇᴛᴛɪɴɢs ᴍᴇɴᴜ?."""
     
     CHANNELS = """
 <b>๏ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ɢɪᴠᴇɴ ʙᴇʟᴏᴡ ᴛᴏ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟs ᴀɴᴅ ɢᴇᴛ ᴍᴏʀᴇ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ ᴜs.
 
-ɪғ ʏᴏᴜ ғᴏᴜɴᴅ ᴀɴʏ ʙᴜɢ ɪɴ ˹ʟᴜᴄʏ˼ ᴏʀ ɪғ ʏᴏᴜ ᴡᴀɴɴᴀ ɢɪᴠᴇ ғᴇᴇᴅʙᴀᴄᴋ ᴀʙᴏᴜᴛ ᴛʜᴇ ʙᴏᴛ˼, ᴩʟᴇᴀsᴇ ʀᴇᴩᴏʀᴛ ɪᴛ ᴀᴛ <a href='https://t.me/+DnmZbLjS0iw0YWI1'>sᴜᴩᴩᴏʀᴛ ᴄʜᴀᴛ</a>.</b>"""
+ɪғ ʏᴏᴜ ғᴏᴜɴᴅ ᴀɴʏ ʙᴜɢ ɪɴ ˹ʟᴜᴄʏ˼ ᴏʀ ɪғ ʏᴏᴜ ᴡᴀɴɴᴀ ɢɪᴠᴇ ғᴇᴇᴅʙᴀᴄᴋ ᴀʙᴏᴜᴛ ᴛʜᴇ ʙᴏᴛ˼, ᴩʟᴇᴀsᴇ ʀᴇᴩᴏʀᴛ ɪᴛ ᴀᴛ <a href='https://t.me/+hc1ZQg8SelMzZGY9'>sᴜᴩᴩᴏʀᴛ ᴄʜᴀᴛ</a>.</b>"""
 
     
     STATUS_TXT = """<b>────「 ᴅᴀᴛᴀʙᴀsᴇ 1 」────</b>
@@ -270,7 +270,7 @@ Nᴀᴍᴇ : {}
 
 Mᴇꜱꜱᴀɢᴇ : <b>{}</b>"""
     
-    CAPTION = """<b><a href="https://t.me/nova_flix">{file_name}</a></b>\n\n<b><blockquote><i>ᴘʟᴇᴀsᴇ ꜰᴏʀᴡᴀʀᴅ ᴛʜɪs ꜰɪʟᴇs ᴛᴏ ᴛʜᴇ sᴀᴠᴇᴅ ᴍᴇssᴀɢᴇ ᴀɴᴅ ᴄʟᴏsᴇ ᴛʜɪs ᴍᴇssᴀɢᴇ</i></blockquote></b>"""
+    CAPTION = """<b><a href="https://t.me/Moviess_Ok">{file_name}</a></b>\n\n<b><blockquote><i>ᴘʟᴇᴀsᴇ ꜰᴏʀᴡᴀʀᴅ ᴛʜɪs ꜰɪʟᴇs ᴛᴏ ᴛʜᴇ sᴀᴠᴇᴅ ᴍᴇssᴀɢᴇ ᴀɴᴅ ᴄʟᴏsᴇ ᴛʜɪs ᴍᴇssᴀɢᴇ</i></blockquote></b>\n\n<blockquote><a href='https://t.me/H_Anime_and_popular_videos'>Aᴅᴜʟᴛ</a></blockquote>"""
 
     IMDB_TEMPLATE_TXT = """
 <b>‣ ᴛɪᴛʟᴇ : <a href={url}>{title}</a>
@@ -461,7 +461,7 @@ BOT WORKING PROPERLY"""
 
     SOURCE_TXT ="""<b>sᴏᴜʀᴄᴇ ᴄᴏᴅᴇ: </b>
 
- ꜱᴏᴜʀᴄᴇ ᴄᴏᴅᴇ ʜᴇʀᴇ ◉› :<a href=https://github.com/codeflix-bots/autofilter.git>Lucy</a>\n """
+ ꜱᴏᴜʀᴄᴇ ᴄᴏᴅᴇ ʜᴇʀᴇ ◉› :<a href=https://github.com/QuirkySiiiiiid>Nɪᴄᴏ Rᴏʙɪɴ</a>\n """
 
     EXTRAF_TXT =""" <b> ʜᴇʀᴇ ɪꜱ ᴍʏ ᴇxᴛʀᴀ ꜰᴇᴀᴛᴜʀᴇꜱ </b>"""
 
@@ -545,13 +545,13 @@ Exᴀᴍᴘʟᴇ 👉 /Instagram ʜᴛᴛᴘs://ᴡᴡᴡ.ɪɴsᴛᴀɢʀᴀᴍ.
 """
 
     TORRENT = """
-ᴛᴏʀʀᴇɴᴛ sᴇᴀʀᴄʜ ᴄᴏᴍᴍᴀɴᴅ
+ᴛᴏʀʀᴇɴᴛ sᴇᴀʀᴄʜ ᴄᴏᴍᴍᴀɴᴅ (under development)
 
 ᴇxᴀᴍᴘʟᴇ : /torrent ᴍᴏɴᴇʏ ʜᴇɪsᴛ
 """
 
     MONGO_TXT = """
-ᴍᴏɴɢᴏ ᴄʜᴇᴄᴋ ᴄᴏᴍᴍᴀɴᴅ
+ᴍᴏɴɢᴏ ᴄʜᴇᴄᴋ ᴄᴏᴍᴍᴀɴᴅ (under development)
 
 ᴇɴᴛᴇʀ ʏᴏᴜʀ MᴏɴɢᴏDB URL ᴀғᴛᴇʀ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ.
 
@@ -574,7 +574,7 @@ Example:
 """
 
     MONGO_TXT = """
-ᴍᴏɴɢᴏ ᴄʜᴇᴄᴋ ᴄᴏᴍᴍᴀɴᴅ
+ᴍᴏɴɢᴏ ᴄʜᴇᴄᴋ ᴄᴏᴍᴍᴀɴᴅ (under development)
 
 ᴇɴᴛᴇʀ ʏᴏᴜʀ MᴏɴɢᴏDB URL ᴀғᴛᴇʀ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ.
 
@@ -600,7 +600,7 @@ Just send the /stream command first and then send any file, then the bot will gi
     AI_TXT = """
 ᴛʜᴇsᴇ ᴀʀᴇ sᴏᴍᴇ ᴀɪ/ᴇxᴘᴇʀᴛ ᴄᴏᴍᴍᴀɴᴅs
 
-➻ Lucy - ʏᴏᴜ ᴄᴀɴ ᴀᴄᴄᴇꜱꜱ ᴊᴀʀᴠɪꜱ ʙʏ ᴛʜɪꜱ.
+➻ Rᴏʙɪɴ - ʏᴏᴜ ᴄᴀɴ ᴀᴄᴄᴇꜱꜱ ᴊᴀʀᴠɪꜱ ʙʏ ᴛʜɪꜱ.
 ➻ Assis - ᴛʜᴇ ᴀɪ ᴡɪʟʟ ʀᴇꜱᴘᴏɴᴅ ɪɴ ᴀᴜᴅɪᴏ ꜰᴏʀᴍᴀᴛ.
 ➻ /gpt - ᴀᴄᴄᴇꜱꜱ ɢᴘᴛ ꜰᴜɴᴄᴛɪᴏɴᴀʟɪᴛʏ.
 ➻ /chatgpt - ᴀᴄᴄᴇꜱꜱ ɢᴘᴛ ꜰᴜɴᴄᴛɪᴏɴᴀʟɪᴛʏ.
@@ -611,6 +611,6 @@ Just send the /stream command first and then send any file, then the bot will gi
 ➻ /mistral - ᴀᴄᴛɪᴠᴀᴛᴇ ᴍɪꜱᴛʀᴀʟ ᴄᴏᴅᴇ.
 ➻ /tts - ᴄᴏɴᴠᴇʀᴛ ᴛᴇxᴛ ᴛᴏ ꜱᴘᴇᴇᴄʜ.
 ➻ /upscale - ɪᴍᴀɢᴇ ᴜᴘsᴄᴀʟᴇ ғʀᴇᴇ ᴀᴘɪ.
-➻ /blackbox : ᴛᴇxᴛ ᴡɪᴛʜ ʀᴇᴘʟʏ ᴛᴏ ᴛʜᴇ ᴘʜᴏᴛᴏ ᴏʀ ᴊᴜsᴛ ᴛᴇxᴛ
+➻ /blackbox : ᴛᴇxᴛ ᴡɪᴛʜ ʀᴇᴘʟʏ ᴛᴏ ᴛʜᴇ ᴘʜᴏᴛᴏ ᴏʀ ᴊᴜsᴛ ᴛᴇxᴛ (under development)
 """
     

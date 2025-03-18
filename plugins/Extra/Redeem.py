@@ -7,6 +7,7 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from info import DATABASE_URI, DATABASE_NAME, ADMINS, PREMIUM_LOGS
 from utils import get_seconds, temp
+import asyncio
 
 PREMIUM_IMAGE = "https://i.ibb.co/BVLLb42X/Black-and-White-Simple-Minimalist-Special-Gift-Voucher-Certificate.jpg"
 
@@ -19,11 +20,13 @@ class RedeemDB:
         self.col_redeem = mydb["redeem_codes"]
         self.col_cooldown = mydb["redeem_cooldown"]
         self.col_users = mydb["users"]
+        self.col_notifications = mydb["premium_notifications"]
         
         # Create indexes
         self.col_redeem.create_index("code", unique=True)
-        self.col_redeem.create_index("created_at", expireAfterSeconds=7*24*60*60)
+        self.col_redeem.create_index("created_at", expireAfterSeconds=30*24*60*60)  # 30 days TTL
         self.col_cooldown.create_index("user_id", unique=True)
+        self.col_notifications.create_index("notification_time")
 
     async def store_redeem_code(self, code: str, time: str, admin_id: int) -> bool:
         try:
@@ -115,6 +118,65 @@ class RedeemDB:
             print(f"Error revoking code: {e}")
             return False
 
+    async def get_dashboard_stats(self):
+        try:
+            total = self.col_redeem.count_documents({})
+            active = self.col_redeem.count_documents({"active": True})
+            used = self.col_redeem.count_documents({"used_by": {"$ne": []}})
+            pending = self.col_redeem.count_documents({"used_by": [], "active": True})
+            revoked = self.col_redeem.count_documents({"active": False})
+            
+            return {
+                "total": total,
+                "active": active,
+                "used": used,
+                "pending": pending,
+                "revoked": revoked
+            }
+        except Exception as e:
+            print(f"Error getting dashboard stats: {e}")
+            return None
+
+    async def get_unused_codes(self):
+        try:
+            return list(self.col_redeem.find({"used_by": [], "active": True}))
+        except Exception as e:
+            print(f"Error getting unused codes: {e}")
+            return []
+
+    async def revoke_all_unused(self):
+        try:
+            result = self.col_redeem.update_many(
+                {"used_by": [], "active": True},
+                {"$set": {"active": False}}
+            )
+            return result.modified_count
+        except Exception as e:
+            print(f"Error revoking unused codes: {e}")
+            return 0
+
+    async def schedule_notifications(self, user_id, expiry_time):
+        try:
+            notifications = [
+                {
+                    "user_id": user_id,
+                    "notification_time": expiry_time - timedelta(hours=2),
+                    "type": "2hour",
+                    "sent": False
+                },
+                {
+                    "user_id": user_id,
+                    "notification_time": expiry_time - timedelta(minutes=10),
+                    "type": "10min",
+                    "sent": False
+                }
+            ]
+            await self.col_notifications.insert_many(notifications)
+            return True
+        except Exception as e:
+            print(f"Error scheduling notifications: {e}")
+            return False
+
 # Initialize the database class
 db = RedeemDB()
 
@@ -160,7 +222,7 @@ async def add_redeem_code(client, message):
         return
 
     status_msg = await message.reply_text("⏳ Generating premium codes...")
-    
+
     try:
         codes = []
         failed_codes = []
@@ -180,14 +242,14 @@ async def add_redeem_code(client, message):
 
         codes_text = '\n'.join(f"┃  🎟️ <code>/redeem {code}</code>" for code in codes)
         text = f"""
-┏━━━━━ PREMIUM CODES ━━━━━┓
-┃                         ┃
-{codes_text}
-┃                         ┃
-┃  ⏳ Duration: {time}    ┃
+┏━━━━━ PREMIUM CODES ━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                           ┃
+            {codes_text}                    ┃
+┃                                           ┃
+┃  ⏳ Duration: {time}                     ┃
 ┃  📊 Generated: {len(codes)}/{num_codes}  ┃
-┃                         ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━┛
+┃                                           ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 🔰 Instructions:
 • Each code can be used once
@@ -216,7 +278,7 @@ async def add_redeem_code(client, message):
                 
     except Exception as e:
         await status_msg.edit_text(f"❌ Error generating codes: {str(e)}")
-        
+
 @Client.on_message(filters.command("redeem"))
 async def redeem_code(client, message):
     try:
@@ -291,14 +353,14 @@ async def redeem_code(client, message):
 
             expiry_str = expiry_time.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y %I:%M:%S %p")
             success_text = f"""
-┏━━━━ PREMIUM ACTIVATED ━━━━┓
-┃                           ┃
-┃  👤 User: {user.mention}  ┃
-┃  🆔 ID: {user_id}         ┃
-┃  ⏳ Duration: {time}      ┃
-┃  📅 Expires: {expiry_str} ┃
-┃                           ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
+┏━━━━ PREMIUM ACTIVATED ━━━━━━┓
+┃                             ┃
+┃  👤 User: {user.mention}    ┃
+┃  🆔 ID: {user_id}           ┃
+┃  ⏳ Duration: {time}        ┃
+┃  📅 Expires: {expiry_str}   ┃
+┃                             ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 """
             try:
                 # Send success message with image
@@ -348,6 +410,9 @@ async def redeem_code(client, message):
                 await status_msg.edit_text(f"❌ Error verifying premium activation: {str(e)}")
                 return
 
+            # Schedule expiry notifications
+            await db.schedule_notifications(user_id, expiry_time)
+
         except Exception as e:
             await status_msg.edit_text(f"❌ Error processing redemption: {str(e)}")
 
@@ -383,3 +448,133 @@ async def revoke_code(client, message):
         await message.reply_text(f"✅ Code {code} has been revoked.")
     else:
         await message.reply_text("❌ Code not found or already revoked.")
+
+@Client.on_message(filters.command("dashboard") & filters.user(ADMINS))
+async def premium_dashboard(client, message):
+    try:
+        stats = await db.get_dashboard_stats()
+        if not stats:
+            await message.reply_text("❌ Error fetching dashboard stats")
+            return
+
+        dashboard = f"""
+┏━━━━━ PREMIUM DASHBOARD ━━━━━━━━━━━━━━━━━┓
+┃                                         ┃
+┃  <i> Statistics: </i>                   ┃
+┃  • Total Generated: {stats['total']}    ┃
+┃  • Currently Active: {stats['active']}  ┃
+┃  • Used Codes: {stats['used']}          ┃
+┃  • Pending Codes: {stats['pending']}    ┃
+┃  • Auto-Revoked: {stats['revoked']}     ┃
+┃                                         ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+"""
+        buttons = InlineKeyboardMarkup([
+            [InlineKeyboardButton("📋 List Unused Codes", callback_data="list_unused")],
+            [InlineKeyboardButton("❌ Revoke All Unused", callback_data="revoke_all")]
+        ])
+        
+        await message.reply_text(dashboard, reply_markup=buttons)
+    except Exception as e:
+        await log_error(client, "Dashboard Error", str(e), message.from_user)
+
+@Client.on_callback_query(filters.regex("^list_unused$"))
+async def list_unused_codes(client, callback_query):
+    try:
+        codes = await db.get_unused_codes()
+        if not codes:
+            await callback_query.answer("No unused codes found!", show_alert=True)
+            return
+
+        text = "┏━━━━━ UNUSED CODES ━━━━━┓\n"
+        for code in codes:
+            created = code['created_at'].strftime("%d-%m-%Y")
+            text += f"┃ Code: {code['code']}\n┃ Created: {created}\n┃ Duration: {code['time']}\n┃ ─────────────── ┃\n"
+        text += "┗━━━━━━━━━━━━━━━━━━━━━┛"
+
+        if len(text) > 4096:
+            # Split into multiple messages if too long
+            chunks = [text[i:i+4096] for i in range(0, len(text), 4096)]
+            for chunk in chunks:
+                await callback_query.message.reply_text(chunk)
+        else:
+            await callback_query.message.reply_text(text)
+        
+        await callback_query.answer()
+    except Exception as e:
+        await log_error(client, "List Unused Error", str(e), callback_query.from_user)
+
+@Client.on_callback_query(filters.regex("^revoke_all$"))
+async def revoke_all_codes(client, callback_query):
+    try:
+        confirm_buttons = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton("✅ Yes", callback_data="confirm_revoke"),
+                InlineKeyboardButton("❌ No", callback_data="cancel_revoke")
+            ]
+        ])
+        await callback_query.message.reply_text(
+            "⚠️ Are you sure you want to revoke all unused codes?",
+            reply_markup=confirm_buttons
+        )
+        await callback_query.answer()
+    except Exception as e:
+        await log_error(client, "Revoke All Error", str(e), callback_query.from_user)
+
+@Client.on_callback_query(filters.regex("^confirm_revoke$"))
+async def confirm_revoke_all(client, callback_query):
+    try:
+        count = await db.revoke_all_unused()
+        await callback_query.message.reply_text(f"✅ Successfully revoked {count} unused codes.")
+        await callback_query.answer()
+    except Exception as e:
+        await log_error(client, "Confirm Revoke Error", str(e), callback_query.from_user)
+
+async def check_premium_notifications():
+    while True:
+        try:
+            now = datetime.now(pytz.utc)
+            pending_notifications = db.col_notifications.find({
+                "notification_time": {"$lte": now},
+                "sent": False
+            })
+
+            for notification in pending_notifications:
+                user_id = notification["user_id"]
+                notification_type = notification["type"]
+                
+                if notification_type == "2hour":
+                    text = "⚠️ Your premium access will expire in 2 hours!"
+                else:
+                    text = "🚨 Your premium access will expire in 10 minutes!"
+                
+                try:
+                    await app.send_message(user_id, text)
+                    await db.col_notifications.update_one(
+                        {"_id": notification["_id"]},
+                        {"$set": {"sent": True}}
+                    )
+                except Exception as e:
+                    print(f"Failed to send notification: {e}")
+
+        except Exception as e:
+            print(f"Notification checker error: {e}")
+        
+        await asyncio.sleep(60)  # Check every minute
+
+# Start notification checker
+asyncio.create_task(check_premium_notifications())
+
+async def log_error(client, error_type: str, details: str, user=None):
+    try:
+        error_msg = f"""
+#ERROR_LOG
+Type: {error_type}
+Time: {datetime.now(pytz.utc)}
+User: {user.mention if user else 'N/A'}
+Details: {details}
+"""
+        if PREMIUM_LOGS:
+            await client.send_message(PREMIUM_LOGS, error_msg)
+    except Exception as e:
+        print(f"Failed to log error: {e}")

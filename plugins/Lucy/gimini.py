@@ -125,9 +125,13 @@ async def geminivision_handler(client: Client, message: Message):
             data = base64.b64encode(image_file.read()).decode("utf-8")
             mime_type, _ = mimetypes.guess_type(file_path)
             
-        messages = [{"role": "user", "content": prompt, "image": {"data": data, "mime_type": mime_type}}]
-        response = await lexica_client.ChatCompletion(messages, languageModels.geminiVision)
+        messages = [Messages(
+            content=prompt,
+            role="user",
+            image={"data": data, "mime_type": mime_type}
+        )]
         
+        response = await lexica_client.ChatCompletion(messages, languageModels.geminiVision)
         content = extract_content(response)
         await message.reply_text(format_response("Gemini Vision", content) if content else "No content received from the API.")
     except Exception as e:

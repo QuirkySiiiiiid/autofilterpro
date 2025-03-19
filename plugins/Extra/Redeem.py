@@ -258,13 +258,8 @@ async def add_redeem_code(client, message):
         codes_text = '\n'.join(f"┃  🎟️ <code>/redeem {code}</code>" for code in codes)
         text = f"""
 ╭────────❏ PREMIUM CODES ❏───────────╮
-│   ____ ____ ____ ____ ____ 
-│  ||R |||o |||b |||i |||n ||
-│  ||__|||__|||__|||__|||__||
-│  |/__\|/__\|/__\|/__\|/__\|
 │
-│
-│  {codes_text}                       
+│ {codes_text}                       
 │                                     
 │  ☃ Duration: {time}                 
 │  Generated: {len(codes)}/{num_codes}
@@ -308,25 +303,19 @@ async def redeem_code(client, message):
             await message.reply_text("❌ Usage: /redeem <code>")
             return
 
-        status_msg = await message.reply_text("⏳ Processing your redeem request...")
-
-        # Check cooldown with verification
-        try:
-            cooldown = await db.get_user_cooldown(user_id)
-            if cooldown:
-                # Verify cooldown data
-                if not isinstance(cooldown.get("cooldown_until"), datetime):
-                    await db.col_cooldown.delete_one({"user_id": user_id})
-                    cooldown = None
-                
-            if cooldown and cooldown["cooldown_until"] > datetime.now(pytz.utc):
-                remaining = (cooldown["cooldown_until"] - datetime.now(pytz.utc)).seconds
-                await status_msg.edit_text(f"⏳ Please wait {remaining//60}m {remaining%60}s before trying again.")
+        redeem_code = message.command[1]
+        
+        # Check cooldown
+        cooldown = await db.get_user_cooldown(user_id)
+        if cooldown:
+            cooldown_time = cooldown["cooldown_until"]
+            if cooldown_time > datetime.now(pytz.utc):
+                remaining = (cooldown_time - datetime.now(pytz.utc)).seconds
+                await message.reply_text(f"⏳ Please wait {remaining//60}m {remaining%60}s before trying again.")
                 return
-        except Exception as e:
-            print(f"Cooldown check error: {str(e)}")
 
-        redeem_code = message.command[1].strip().upper()
+        status_msg = await message.reply_text("⏳ Processing redemption...")
+
         try:
             code_data = await db.get_redeem_code(redeem_code)
         except Exception as e:
@@ -374,19 +363,11 @@ async def redeem_code(client, message):
             expiry_str = expiry_time.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y %I:%M:%S %p")
             success_text = f"""
 ╭─❏ <b>PREMIUM ACTIVATED</b> ❏──╮
-│  +----------------------------------------+
-|                                            
-|   ░█▀█░▀█▀░█▀▀░█▀█░░░█▀▄░█▀█░█▀▄░▀█▀░█▀█ 
-|   ░█░█░░█░░█░░░█░█░░░█▀▄░█░█░█▀▄░░█░░█░█ 
-|   ░▀░▀░▀▀▀░▀▀▀░▀▀▀░░░▀░▀░▀▀▀░▀▀░░▀▀▀░▀░▀ 
-|                                            
-|   +----------------------------------------+
 │
-│
-│<i>👤 User: {user.mention}  
-│ 🆔 ID: `{user_id}`  
-│ ⏳ Duration: {time}  
-│ 📅 Expires: `{expiry_str}`</i>  
+│ 👤 <i>User:</i>{user.mention}   
+│ 🆔 <i>ID:</i>`{user_id}`  
+│ ⏳ <i>Duration:</i>{time}  
+│ 📅 <i>Expires:</i>`{expiry_str}`  
 ╰───────────────────────────╯
 """
             try:
@@ -484,21 +465,14 @@ async def premium_dashboard(client, message):
             await message.reply_text("❌ Error fetching dashboard stats")
             return
 
-        dashboard = f"""shell
-██████╗ ███████╗███████╗
-██╔══██╗██╔════╝██╔════╝
-██████╔╝█████╗  ███████╗
-██╔═══╝ ██╔══╝  ╚════██║
-██║     ██║     ███████║
-╚═╝     ╚═╝     ╚══════╝
+        dashboard = f"""
   PREMIUM DASHBOARD
-----------------------
+
 [+] Total Generated: {stats['total']}
 [+] Active Users:    {stats['active']}
 [+] Used Codes:      {stats['used']}
 [+] Pending Codes:   {stats['pending']}
 [+] Auto-Revoked:    {stats['revoked']}
-----------------------
 """
         buttons = InlineKeyboardMarkup([
             [InlineKeyboardButton("📋 List Unused Codes", callback_data="list_unused")],
@@ -562,32 +536,45 @@ async def confirm_revoke_all(client, callback_query):
         await log_error(client, "Confirm Revoke Error", str(e), callback_query.from_user)
 
 async def check_premium_notifications():
-    client = Client.get_current()  # Get the current client instance
+    try:
+        # Get bot instance
+        bot = Client.get_current()
+    except Exception as e:
+        print(f"Failed to get bot instance: {e}")
+        return
+
     while True:
         try:
             now = datetime.now(pytz.utc)
-            pending_notifications = db.col_notifications.find({
+            # Find pending notifications
+            pending = db.col_notifications.find({
                 "notification_time": {"$lte": now},
                 "sent": False
             })
 
-            for notification in pending_notifications:
-                user_id = notification["user_id"]
-                notification_type = notification["type"]
-                
-                if notification_type == "2hour":
-                    text = "⚠️ Your premium access will expire in 2 hours!"
-                else:
-                    text = "🚨 Your premium access will expire in 10 minutes!"
-                
+            async for notification in pending:
                 try:
-                    await client.send_message(user_id, text)  # Use client instead of app
+                    user_id = notification["user_id"]
+                    notification_type = notification["type"]
+                    
+                    text = ("⚠️ Your premium access will expire in 2 hours!" 
+                           if notification_type == "2hour" 
+                           else "🚨 Your premium access will expire in 10 minutes!")
+                    
+                    # Send new message instead of editing
+                    await bot.send_message(
+                        chat_id=user_id,
+                        text=text
+                    )
+                    
+                    # Mark as sent
                     await db.col_notifications.update_one(
                         {"_id": notification["_id"]},
                         {"$set": {"sent": True}}
                     )
                 except Exception as e:
-                    print(f"Failed to send notification: {e}")
+                    print(f"Failed to send notification to {user_id}: {e}")
+                    continue
 
         except Exception as e:
             print(f"Notification checker error: {e}")

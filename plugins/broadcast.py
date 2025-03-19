@@ -6,6 +6,7 @@ from pyrogram import Client, filters, enums
 from database.users_chats_db import db
 from info import ADMINS, GRP_LNK
 from itertools import cycle
+import pytz
 
 # Loading animation frames
 LOADING_CHARS = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
@@ -70,7 +71,7 @@ async def broadcast_handler(bot, message):
     
     total_users = await db.total_users_count()
     done = 0
-    successful_users = []  # Store successful user IDs
+    successful_users = []
     stats = {
         "successful": 0,
         "blocked": 0,
@@ -78,35 +79,63 @@ async def broadcast_handler(bot, message):
         "failed": 0
     }
     
+    # Create batches of users for concurrent processing
+    BATCH_SIZE = 100  # Process 100 users at once
+    user_batches = []
+    current_batch = []
+    
     async for user in users:
-        try:
-            pti, sh = await broadcast_messages(int(user['id']), reply_message, None)
+        current_batch.append(user['id'])
+        if len(current_batch) >= BATCH_SIZE:
+            user_batches.append(current_batch)
+            current_batch = []
+    if current_batch:
+        user_batches.append(current_batch)
+
+    last_update_time = time.time()
+    UPDATE_INTERVAL = 3  # Update status every 3 seconds
+
+    for batch in user_batches:
+        # Process each batch concurrently
+        tasks = [broadcast_messages(user_id, reply_message, None) for user_id in batch]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Process results
+        for user_id, result in zip(batch, results):
+            if isinstance(result, Exception):
+                stats['failed'] += 1
+                continue
+                
+            pti, sh = result
             if pti:
                 stats['successful'] += 1
-                successful_users.append(int(user['id']))
+                successful_users.append(user_id)
             else:
-                if sh == "Deleted/Blocked":
+                if sh == "Blocked":
                     stats['blocked'] += 1
+                elif sh == "Deleted":
+                    stats['deleted'] += 1
                 else:
                     stats['failed'] += 1
             
             done += 1
-            if not done % 20:  # Update every 20 messages
+            
+            # Update progress based on time interval instead of message count
+            current_time = time.time()
+            if current_time - last_update_time >= UPDATE_INTERVAL:
                 await update_progress_message(status_msg, done, total_users, stats)
-                
-        except Exception as e:
-            stats['failed'] += 1
-            print(f"Broadcast Error: {e}")
+                last_update_time = current_time
         
-        await asyncio.sleep(0.1)
+        # Small delay between batches to prevent flooding
+        await asyncio.sleep(0.5)
 
     time_taken = datetime.datetime.now() - start_time
     
-    # Final status with pin option
-    buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📌 Pin Broadcast", callback_data="pin_broadcast")],
-        [InlineKeyboardButton("❌ Close", callback_data="close_broadcast")]
-    ])
+    # Store context in temp variable
+    temp.BROADCAST_CONTEXT = {
+        "successful_users": successful_users,
+        "broadcast_message": reply_message
+    }
     
     final_status = f"""
 <b>✅ Broadcast Completed!</b>
@@ -117,17 +146,17 @@ async def broadcast_handler(bot, message):
 <b>👥 Total Users:</b> <code>{total_users}</code>
 <b>✅ Successful:</b> <code>{stats['successful']}</code>
 <b>🚫 Blocked:</b> <code>{stats['blocked']}</code>
+<b>🗑 Deleted:</b> <code>{stats['deleted']}</code>
 <b>❌ Failed:</b> <code>{stats['failed']}</code>
 
 <i>Use buttons below to pin broadcast or close this message.</i>
 """
-    # Store context for pin operation
-    context = {
-        "successful_users": successful_users,
-        "broadcast_message": reply_message
-    }
+    
+    buttons = InlineKeyboardMarkup([
+        [InlineKeyboardButton("📌 Pin Broadcast", callback_data="pin_broadcast")],
+        [InlineKeyboardButton("❌ Close", callback_data="close_broadcast")]
+    ])
     await status_msg.edit(final_status, reply_markup=buttons)
-    return context
 
 @Client.on_callback_query(filters.regex("^pin_broadcast"))
 async def pin_broadcast_callback(bot, query):
@@ -135,9 +164,11 @@ async def pin_broadcast_callback(bot, query):
         await query.answer("Starting to pin broadcast messages...")
         status_msg = await query.message.edit_text("📌 Pinning broadcast messages...", reply_markup=None)
         
-        # Get context from stored data
-        context = query.message.context  # You'll need to store this during broadcast
-        
+        # Get context from temp
+        context = temp.BROADCAST_CONTEXT
+        if not context:
+            raise Exception("Broadcast context not found")
+            
         pinned, failed = await pin_broadcast_message(
             bot,
             context["successful_users"],
@@ -153,7 +184,9 @@ async def pin_broadcast_callback(bot, query):
 <i>Messages have been silently pinned.</i>
 """)
     except Exception as e:
-        await query.message.edit_text(f"❌ Error during pinning: {str(e)}")
+        error_text = f"Error during pinning: {str(e)}"
+        # Log error to file and send to admin
+        await log_error(bot, error_text, query.from_user.id)
 
 @Client.on_callback_query(filters.regex("^close_broadcast"))
 async def close_broadcast_callback(bot, query):
@@ -183,6 +216,7 @@ async def group_broadcast(bot, message):
         "deleted": 0,
         "failed": 0
     }
+    errors = []  # Store errors for logging
     
     async for chat in chats:
         try:
@@ -192,8 +226,10 @@ async def group_broadcast(bot, message):
             else:
                 if sh == "Deleted/Blocked":
                     stats['deleted'] += 1
+                    errors.append(f"Chat {chat['id']}: Deleted/Blocked")
                 else:
                     stats['failed'] += 1
+                    errors.append(f"Chat {chat['id']}: {sh}")
             
             done += 1
             if not done % 20:
@@ -207,6 +243,11 @@ async def group_broadcast(bot, message):
 
     time_taken = datetime.datetime.now() - start_time
     
+    # If there are errors, log them
+    if errors:
+        error_text = "\n".join(errors)
+        await log_error(bot, error_text, message.from_user.id)
+
     final_status = f"""
 <b>✅ Group Broadcast Completed!</b>
 
@@ -248,47 +289,47 @@ async def remove_junkuser__db(bot, message):
     await bot.send_message(message.chat.id, f"Completed:\nCompleted in {time_taken} seconds.\n\nTotal Users {total_users}\nCompleted: {done} / {total_users}\nBlocked: {blocked}\nDeleted: {deleted}")
 
 
-@Client.on_message(filters.command("grp_broadcast") & filters.user(ADMINS) & filters.reply)
-async def broadcast_group(bot, message):
-    groups = await db.get_all_chats()
-    if not groups:
-        grp = await message.reply_text("❌ Nᴏ ɢʀᴏᴜᴘs ғᴏᴜɴᴅ ғᴏʀ ʙʀᴏᴀᴅᴄᴀsᴛɪɴɢ.")
-        await asyncio.sleep(60)
-        await grp.delete()
-        return
-    b_msg = message.reply_to_message
-    sts = await message.reply_text(text='Bʀᴏᴀᴅᴄᴀsᴛɪɴɢ ʏᴏᴜʀ ᴍᴇssᴀɢᴇs Tᴏ Gʀᴏᴜᴘs...')
-    start_time = time.time()
-    total_groups = await db.total_chat_count()
-    done = 0
-    failed = ""
-    success = 0
-    deleted = 0
-    async for group in groups:
-        pti, sh, ex = await broadcast_messages_group(int(group['id']), b_msg)
-        if pti == True:
-            if sh == "Succes":
-                success += 1
-        elif pti == False:
-            if sh == "deleted":
-                deleted+=1 
-                failed += ex 
-                try:
-                    await bot.leave_chat(int(group['id']))
-                except Exception as e:
-                    print(f"{e} > {group['id']}")  
-        done += 1
-        if not done % 20:
-            await sts.edit(f"Broadcast in progress:\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nSuccess: {success}\nDeleted: {deleted}")    
-    time_taken = datetime.timedelta(seconds=int(time.time()-start_time))
-    await sts.delete()
-    try:
-        await message.reply_text(f"Broadcast Completed:\nCompleted in {time_taken} seconds.\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nSuccess: {success}\nDeleted: {deleted}\n\nFiled Reson:- {failed}")
-    except MessageTooLong:
-        with open('reason.txt', 'w+') as outfile:
-            outfile.write(failed)
-        await message.reply_document('reason.txt', caption=f"Completed:\nCompleted in {time_taken} seconds.\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nSuccess: {success}\nDeleted: {deleted}")
-        os.remove("reason.txt")
+# @Client.on_message(filters.command("grp_broadcast") & filters.user(ADMINS) & filters.reply)
+# async def broadcast_group(bot, message):
+#     groups = await db.get_all_chats()
+#     if not groups:
+#         grp = await message.reply_text("❌ Nᴏ ɢʀᴏᴜᴘs ғᴏᴜɴᴅ ғᴏʀ ʙʀᴏᴀᴅᴄᴀsᴛɪɴɢ.")
+#         await asyncio.sleep(60)
+#         await grp.delete()
+#         return
+#     b_msg = message.reply_to_message
+#     sts = await message.reply_text(text='Bʀᴏᴀᴅᴄᴀsᴛɪɴɢ ʏᴏᴜʀ ᴍᴇssᴀɢᴇs Tᴏ Gʀᴏᴜᴘs...')
+#     start_time = time.time()
+#     total_groups = await db.total_chat_count()
+#     done = 0
+#     failed = ""
+#     success = 0
+#     deleted = 0
+#     async for group in groups:
+#         pti, sh, ex = await broadcast_messages_group(int(group['id']), b_msg)
+#         if pti == True:
+#             if sh == "Succes":
+#                 success += 1
+#         elif pti == False:
+#             if sh == "deleted":
+#                 deleted+=1 
+#                 failed += ex 
+#                 try:
+#                     await bot.leave_chat(int(group['id']))
+#                 except Exception as e:
+#                     print(f"{e} > {group['id']}")  
+#         done += 1
+#         if not done % 20:
+#             await sts.edit(f"Broadcast in progress:\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nSuccess: {success}\nDeleted: {deleted}")    
+#     time_taken = datetime.timedelta(seconds=int(time.time()-start_time))
+#     await sts.delete()
+#     try:
+#         await message.reply_text(f"Broadcast Completed:\nCompleted in {time_taken} seconds.\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nSuccess: {success}\nDeleted: {deleted}\n\nFiled Reson:- {failed}")
+#     except MessageTooLong:
+#         with open('reason.txt', 'w+') as outfile:
+#             outfile.write(failed)
+#         await message.reply_document('reason.txt', caption=f"Completed:\nCompleted in {time_taken} seconds.\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nSuccess: {success}\nDeleted: {deleted}")
+#         os.remove("reason.txt")
 
       
 @Client.on_message(filters.command(["junk_group", "clear_junk_group"]) & filters.user(ADMINS))
@@ -397,3 +438,32 @@ async def broadcast_messages(user_id, message, reply_markup=None):
         return False, "Error"
     except Exception as e:
         return False, "Error"
+
+async def log_error(bot, error_text: str, user_id: int):
+    """Log errors and send to admin"""
+    try:
+        # Create error log file
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"error_log_{timestamp}.txt"
+        
+        with open(filename, "w") as f:
+            f.write(f"Error Time: {datetime.datetime.now()}\n")
+            f.write(f"User ID: {user_id}\n")
+            f.write(f"Error Details:\n{error_text}")
+            
+        # Send file to admin
+        for admin in ADMINS:
+            try:
+                await bot.send_document(
+                    chat_id=admin,
+                    document=filename,
+                    caption="❌ Broadcast Error Log"
+                )
+            except Exception as e:
+                print(f"Failed to send error log to admin {admin}: {e}")
+                
+        # Clean up file
+        os.remove(filename)
+        
+    except Exception as e:
+        print(f"Error in error logging: {e}")

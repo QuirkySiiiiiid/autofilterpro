@@ -1663,7 +1663,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.answer(f"⚠️ SOMETHING WENT WRONG \n\n{e}", show_alert=True)
             return
             
-       #@codeflix_bots
+       
     
     elif query.data == "pagesn1":
         await query.answer(text=script.PAGE_TXT, show_alert=True)

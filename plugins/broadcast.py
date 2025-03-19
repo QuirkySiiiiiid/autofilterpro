@@ -47,10 +47,14 @@ async def pin_broadcast_message(client, user_ids, message):
     
     for user_id in user_ids:
         try:
-            # First send the message
+            # First send the message and get the message object
             sent_msg = await message.copy(chat_id=user_id)
-            # Then try to pin it
-            await sent_msg.pin(disable_notification=True)
+            # Then try to pin it using pinChatMessage
+            await client.pinChatMessage(
+                chat_id=user_id,
+                message_id=sent_msg.id,
+                disable_notification=True
+            )
             pinned += 1
             await asyncio.sleep(0.2)  # Small delay to prevent flooding
         except Exception as e:
@@ -116,7 +120,7 @@ async def broadcast_handler(bot, message):
                 done += 1
                 
                 # Update progress more frequently
-                if done % 20 == 0 or done == total_users:
+                if done % 4 == 0 or done == total_users:
                     progress = (done / total_users) * 100
                     progress_bar = "".join("█" for _ in range(int(progress/10))) + "".join("░" for _ in range(10-int(progress/10)))
                     await status_msg.edit(f"""
@@ -237,7 +241,7 @@ async def group_broadcast(bot, message):
                     errors.append(f"Chat {chat['id']}: {sh}")
             
             done += 1
-            if not done % 20:
+            if not done % 4:
                 await update_progress_message(status_msg, done, total_chats, stats)
                 
         except Exception as e:
@@ -287,7 +291,7 @@ async def remove_junkuser__db(bot, message):
             elif sh == "Error":
                 failed += 1
         done += 1
-        if not done % 20:
+        if not done % 4:
             await sts.edit(f"In Progress:\n\nTotal Users {total_users}\nCompleted: {done} / {total_users}\nBlocked: {blocked}\nDeleted: {deleted}")    
     time_taken = datetime.timedelta(seconds=int(time.time()-start_time))
     await sts.delete()
@@ -363,7 +367,7 @@ async def junk_clear_group(bot, message):
                 except Exception as e:
                     print(f"{e} > {group['id']}")  
         done += 1
-        if not done % 20:
+        if not done % 4:
             await sts.edit(f"in progress:\n\nTotal Groups {total_groups}\nCompleted: {done} / {total_groups}\nDeleted: {deleted}")    
     time_taken = datetime.timedelta(seconds=int(time.time()-start_time))
     await sts.delete()

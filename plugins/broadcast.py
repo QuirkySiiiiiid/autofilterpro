@@ -47,13 +47,16 @@ async def pin_broadcast_message(client, user_ids, message):
     
     for user_id in user_ids:
         try:
+            # First send the message
             sent_msg = await message.copy(chat_id=user_id)
-            await sent_msg.pin(disable_notification=True)  # Silent pin
+            # Then try to pin it
+            await sent_msg.pin(disable_notification=True)
             pinned += 1
-            await asyncio.sleep(0.1)  # Prevent flooding
+            await asyncio.sleep(0.2)  # Small delay to prevent flooding
         except Exception as e:
             print(f"Failed to pin for {user_id}: {str(e)}")
             failed += 1
+            continue
     
     return pinned, failed
 

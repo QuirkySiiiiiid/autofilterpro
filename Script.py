@@ -1,5 +1,5 @@
 class script(object):
-    START_TXT = """<b>ʜᴇʏ ⤷»{}, {}\n\nɪ ᴀᴍ ᴛʜᴇ ᴍᴏꜱᴛ ᴘᴏᴡᴇʀꜰᴜʟ ᴀᴜᴛᴏ ꜰɪʟᴛᴇʀ ʙᴏᴛ ᴡɪᴛʜ ᴘʀᴇᴍɪᴜᴍ ꜰᴇᴀᴛᴜʀᴇꜱ, ᴊᴜsᴛ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ ᴀɴᴅ ᴇɴᴊᴏʏ!\n\n<blockquote>‣ ᴍᴀɪɴᴛᴀɪɴᴇᴅ ʙʏ : <a href="https://t.me/Anime106_Request_bot">Sɪɪɪɪɪɪᴅ</a></blockquote></b>\n\n<blockquote expandable><i> ⤷ Oᴛʜᴇʀ Wᴏʀᴋɪɴɢ Bᴏᴛs\n Iɴsᴛᴀ Dᴏᴡɴʟᴏᴀᴅᴇʀ @InstaGrSaverBot Oʀ ʏᴏᴜ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ʙᴏᴛ ᴛᴏᴏ\n Aᴅᴠᴀɴᴄᴇ Fɪʟᴇ Sᴛᴏʀᴇ ʙᴏᴛ @Zoro_filebot \nCᴏɴᴛᴀᴄᴛ Aᴅᴍɪɴ ❝ @Anime106_Request_bot</i></bloekquote>"""
+    START_TXT = """<b>ʜᴇʏ »{}, {}\n\nɪ ᴀᴍ ᴛʜᴇ ᴍᴏꜱᴛ ᴘᴏᴡᴇʀꜰᴜʟ ᴀᴜᴛᴏ ꜰɪʟᴛᴇʀ ʙᴏᴛ ᴡɪᴛʜ ᴘʀᴇᴍɪᴜᴍ ꜰᴇᴀᴛᴜʀᴇꜱ, ᴊᴜsᴛ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ ᴀɴᴅ ᴇɴᴊᴏʏ!\n\n<blockquote>‣ ᴍᴀɪɴᴛᴀɪɴᴇᴅ ʙʏ : <a href="https://t.me/Anime106_Request_bot">Sɪɪɪɪɪɪᴅ</a></blockquote>\n\n<blockquote expandable><i>⤷ Oᴛʜᴇʀ Wᴏʀᴋɪɴɢ Bᴏᴛs\nIɴsᴛᴀ Dᴏᴡɴʟᴏᴀᴅᴇʀ @InstaGrSaverBot Oʀ ʏᴏᴜ ᴄᴀɴ ᴜsᴇ ᴛʜɪs ʙᴏᴛ ᴛᴏᴏ\nAᴅᴠᴀɴᴄᴇ Fɪʟᴇ Sᴛᴏʀᴇ ʙᴏᴛ @Zoro_filebot \nCᴏɴᴛᴀᴄᴛ Aᴅᴍɪɴ ❝ @Anime106_Request_bot</i></blockquote></b>"""
 
     GSTART_TXT = """<b>ʜᴇʏ {}, {}\n\nɪ ᴀᴍ ᴛʜᴇ ᴍᴏꜱᴛ ᴘᴏᴡᴇʀꜰᴜʟ ᴀᴜᴛᴏ ꜰɪʟᴛᴇʀ ʙᴏᴛ ᴡɪᴛʜ ᴘʀᴇᴍɪᴜᴍ ꜰᴇᴀᴛᴜʀᴇꜱ, ᴊᴜsᴛ ᴀᴅᴅ ᴍᴇ ᴛᴏ ʏᴏᴜʀ ɢʀᴏᴜᴘ ᴀɴᴅ ᴇɴᴊᴏʏ!\n\n<blockquote>‣ ᴍᴀɪɴᴛᴀɪɴᴇᴅ ʙʏ : <a href="https://t.me/Anime106_Request_bot">Sɪɪɪɪɪɪᴅ</a></blockquote></b>"""
     

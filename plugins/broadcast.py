@@ -7,6 +7,7 @@ from database.users_chats_db import db
 from info import ADMINS, GRP_LNK
 from itertools import cycle
 import pytz
+from utils import temp  # Add this at the top with other imports
 
 # Loading animation frames
 LOADING_CHARS = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
@@ -78,85 +79,86 @@ async def broadcast_handler(bot, message):
         "deleted": 0,
         "failed": 0
     }
-    
-    # Create batches of users for concurrent processing
-    BATCH_SIZE = 100  # Process 100 users at once
-    user_batches = []
-    current_batch = []
+
+    # Process in smaller batches
+    BATCH_SIZE = 4  # Reduced batch size for more frequent updates
+    user_ids = []
     
     async for user in users:
-        current_batch.append(user['id'])
-        if len(current_batch) >= BATCH_SIZE:
-            user_batches.append(current_batch)
-            current_batch = []
-    if current_batch:
-        user_batches.append(current_batch)
-
-    last_update_time = time.time()
-    UPDATE_INTERVAL = 3  # Update status every 3 seconds
-
-    for batch in user_batches:
-        # Process each batch concurrently
-        tasks = [broadcast_messages(user_id, reply_message, None) for user_id in batch]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        user_ids.append(user['id'])
         
-        # Process results
-        for user_id, result in zip(batch, results):
-            if isinstance(result, Exception):
-                stats['failed'] += 1
-                continue
-                
-            pti, sh = result
-            if pti:
-                stats['successful'] += 1
-                successful_users.append(user_id)
-            else:
-                if sh == "Blocked":
-                    stats['blocked'] += 1
-                elif sh == "Deleted":
-                    stats['deleted'] += 1
-                else:
+        # Process when batch is full or it's the last batch
+        if len(user_ids) >= BATCH_SIZE or (total_users - done) <= len(user_ids):
+            tasks = [broadcast_messages(uid, reply_message) for uid in user_ids]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            # Process results
+            for user_id, result in zip(user_ids, results):
+                if isinstance(result, Exception):
                     stats['failed'] += 1
+                    continue
+                    
+                pti, sh = result
+                if pti:
+                    stats['successful'] += 1
+                    successful_users.append(user_id)
+                else:
+                    if sh == "Blocked":
+                        stats['blocked'] += 1
+                    elif sh == "Deleted":
+                        stats['deleted'] += 1
+                    else:
+                        stats['failed'] += 1
+                
+                done += 1
+                
+                # Update progress more frequently
+                if done % 20 == 0 or done == total_users:
+                    progress = (done / total_users) * 100
+                    progress_bar = "".join("█" for _ in range(int(progress/10))) + "".join("░" for _ in range(10-int(progress/10)))
+                    await status_msg.edit(f"""
+<b>📤 Broadcasting Message...</b>
+
+{progress_bar} {progress:.1f}%
+
+<b>⏳ Progress:</b> {done}/{total_users}
+<b>✅ Success:</b> {stats['successful']}
+<b>🚫 Blocked:</b> {stats['blocked']}
+<b>🗑 Deleted:</b> {stats['deleted']}
+<b>❌ Failed:</b> {stats['failed']}
+""")
             
-            done += 1
-            
-            # Update progress based on time interval instead of message count
-            current_time = time.time()
-            if current_time - last_update_time >= UPDATE_INTERVAL:
-                await update_progress_message(status_msg, done, total_users, stats)
-                last_update_time = current_time
-        
-        # Small delay between batches to prevent flooding
-        await asyncio.sleep(0.5)
+            # Clear batch
+            user_ids = []
+            await asyncio.sleep(0.5)  # Small delay between batches
 
     time_taken = datetime.datetime.now() - start_time
     
-    # Store context in temp variable
+    # Store context for pin option
     temp.BROADCAST_CONTEXT = {
         "successful_users": successful_users,
         "broadcast_message": reply_message
     }
     
-    final_status = f"""
-<b>✅ Broadcast Completed!</b>
-
-[██████████] 100% ✓
-
-<b>⏰ Time Taken:</b> <code>{time_taken.seconds} seconds</code>
-<b>👥 Total Users:</b> <code>{total_users}</code>
-<b>✅ Successful:</b> <code>{stats['successful']}</code>
-<b>🚫 Blocked:</b> <code>{stats['blocked']}</code>
-<b>🗑 Deleted:</b> <code>{stats['deleted']}</code>
-<b>❌ Failed:</b> <code>{stats['failed']}</code>
-
-<i>Use buttons below to pin broadcast or close this message.</i>
-"""
-    
     buttons = InlineKeyboardMarkup([
         [InlineKeyboardButton("📌 Pin Broadcast", callback_data="pin_broadcast")],
         [InlineKeyboardButton("❌ Close", callback_data="close_broadcast")]
     ])
-    await status_msg.edit(final_status, reply_markup=buttons)
+    
+    await status_msg.edit(f"""
+<b>✅ Broadcast Completed!</b>
+
+[██████████] 100% ✓
+
+<b>⏰ Time Taken:</b> {time_taken.seconds} seconds
+<b>👥 Total Users:</b> {total_users}
+<b>✅ Successful:</b> {stats['successful']}
+<b>🚫 Blocked:</b> {stats['blocked']}
+<b>🗑 Deleted:</b> {stats['deleted']}
+<b>❌ Failed:</b> {stats['failed']}
+
+<i>Use buttons below to pin broadcast or close this message.</i>
+""", reply_markup=buttons)
 
 @Client.on_callback_query(filters.regex("^pin_broadcast"))
 async def pin_broadcast_callback(bot, query):

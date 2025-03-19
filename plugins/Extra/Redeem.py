@@ -52,9 +52,24 @@ class RedeemDB:
 
     async def mark_code_used(self, code: str, user_id: int) -> bool:
         try:
+            # First check if code exists and is unused
+            code_data = await self.get_redeem_code(code)
+            if not code_data or code_data.get('used_by'):
+                return False
+            
+            # Update code to mark as used and deactivate it
             result = self.col_redeem.update_one(
-                {"code": code, "active": True},
-                {"$addToSet": {"used_by": user_id}}
+                {
+                    "code": code, 
+                    "active": True,
+                    "used_by": []  # Only update if no one has used it
+                },
+                {
+                    "$set": {
+                        "used_by": [user_id],
+                        "active": False  # Deactivate code after use
+                    }
+                }
             )
             return result.modified_count > 0
         except Exception as e:
@@ -242,14 +257,19 @@ async def add_redeem_code(client, message):
 
         codes_text = '\n'.join(f"┃  🎟️ <code>/redeem {code}</code>" for code in codes)
         text = f"""
-┏━━━━━ PREMIUM CODES ━━━━━━━━━━━━━━━━━━━━━━━┓
-┃                                           ┃
-            {codes_text}                    ┃
-┃                                           ┃
-┃  ⏳ Duration: {time}                     ┃
-┃  📊 Generated: {len(codes)}/{num_codes}  ┃
-┃                                           ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+╭────────❏ PREMIUM CODES ❏───────────╮
+│   ____ ____ ____ ____ ____ 
+│  ||R |||o |||b |||i |||n ||
+│  ||__|||__|||__|||__|||__||
+│  |/__\|/__\|/__\|/__\|/__\|
+│
+│
+│  {codes_text}                       
+│                                     
+│  ☃ Duration: {time}                 
+│  Generated: {len(codes)}/{num_codes}
+│                                     
+╰──────────────────────────────────────╯
 
 🔰 Instructions:
 • Each code can be used once
@@ -338,9 +358,9 @@ async def redeem_code(client, message):
             if current_expiry and current_expiry.replace(tzinfo=pytz.utc) > now_aware:
                 expiry_str = current_expiry.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y %I:%M:%S %p")
                 await status_msg.edit_text(
-                    "┏━━━ PREMIUM ACTIVE ━━━┓\n"
-                    f"┃ Current expiry: {expiry_str} ┃\n"
-                    "┗━━━━━━━━━━━━━━━━━━━┛\n\n"
+                    "╭─❏ PREMIUM ACTIVE ❏──╮\n"
+                    f"│ Current expiry: {expiry_str} ┃\n"
+                    "╰───────────────────────╯\n\n"
                     "❌ Cannot redeem while premium is active."
                 )
                 return
@@ -353,14 +373,21 @@ async def redeem_code(client, message):
 
             expiry_str = expiry_time.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%d-%m-%Y %I:%M:%S %p")
             success_text = f"""
-┏━━━━ PREMIUM ACTIVATED ━━━━━━┓
-┃                             ┃
-┃  👤 User: {user.mention}    ┃
-┃  🆔 ID: {user_id}           ┃
-┃  ⏳ Duration: {time}        ┃
-┃  📅 Expires: {expiry_str}   ┃
-┃                             ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+╭─❏ <b>PREMIUM ACTIVATED</b> ❏──╮
+│  +----------------------------------------+
+|                                            
+|   ░█▀█░▀█▀░█▀▀░█▀█░░░█▀▄░█▀█░█▀▄░▀█▀░█▀█ 
+|   ░█░█░░█░░█░░░█░█░░░█▀▄░█░█░█▀▄░░█░░█░█ 
+|   ░▀░▀░▀▀▀░▀▀▀░▀▀▀░░░▀░▀░▀▀▀░▀▀░░▀▀▀░▀░▀ 
+|                                            
+|   +----------------------------------------+
+│
+│
+│<i>👤 User: {user.mention}  
+│ 🆔 ID: `{user_id}`  
+│ ⏳ Duration: {time}  
+│ 📅 Expires: `{expiry_str}`</i>  
+╰───────────────────────────╯
 """
             try:
                 # Send success message with image
@@ -457,17 +484,21 @@ async def premium_dashboard(client, message):
             await message.reply_text("❌ Error fetching dashboard stats")
             return
 
-        dashboard = f"""
-┏━━━━━ PREMIUM DASHBOARD ━━━━━━━━━━━━━━━━━┓
-┃                                         ┃
-┃  <i> Statistics: </i>                   ┃
-┃  • Total Generated: {stats['total']}    ┃
-┃  • Currently Active: {stats['active']}  ┃
-┃  • Used Codes: {stats['used']}          ┃
-┃  • Pending Codes: {stats['pending']}    ┃
-┃  • Auto-Revoked: {stats['revoked']}     ┃
-┃                                         ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+        dashboard = f"""shell
+██████╗ ███████╗███████╗
+██╔══██╗██╔════╝██╔════╝
+██████╔╝█████╗  ███████╗
+██╔═══╝ ██╔══╝  ╚════██║
+██║     ██║     ███████║
+╚═╝     ╚═╝     ╚══════╝
+  PREMIUM DASHBOARD
+----------------------
+[+] Total Generated: {stats['total']}
+[+] Active Users:    {stats['active']}
+[+] Used Codes:      {stats['used']}
+[+] Pending Codes:   {stats['pending']}
+[+] Auto-Revoked:    {stats['revoked']}
+----------------------
 """
         buttons = InlineKeyboardMarkup([
             [InlineKeyboardButton("📋 List Unused Codes", callback_data="list_unused")],
@@ -531,6 +562,7 @@ async def confirm_revoke_all(client, callback_query):
         await log_error(client, "Confirm Revoke Error", str(e), callback_query.from_user)
 
 async def check_premium_notifications():
+    client = Client.get_current()  # Get the current client instance
     while True:
         try:
             now = datetime.now(pytz.utc)
@@ -549,7 +581,7 @@ async def check_premium_notifications():
                     text = "🚨 Your premium access will expire in 10 minutes!"
                 
                 try:
-                    await app.send_message(user_id, text)
+                    await client.send_message(user_id, text)  # Use client instead of app
                     await db.col_notifications.update_one(
                         {"_id": notification["_id"]},
                         {"$set": {"sent": True}}

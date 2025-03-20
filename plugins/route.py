@@ -22,7 +22,7 @@ async def root_route_handler(request):
     return web.json_response("Lucy_Bot")
 
 
-@routes.get(r"/watch/{path:\S+}", allow_head=True)
+@routes.get(r"watch/{path:\S+}", allow_head=True)
 async def stream_handler(request: web.Request):
     try:
         path = request.match_info["path"]

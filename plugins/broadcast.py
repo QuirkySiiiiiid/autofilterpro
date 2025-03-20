@@ -40,30 +40,6 @@ async def update_progress_message(message, current, total, stats):
     except Exception as e:
         print(f"Error updating progress: {e}")
 
-async def pin_broadcast_message(client, user_ids, message):
-    """Pin broadcast message for all successful users silently"""
-    pinned = 0
-    failed = 0
-    
-    for user_id in user_ids:
-        try:
-            # First send the message and get the message object
-            sent_msg = await message.copy(chat_id=user_id)
-            # Then try to pin it using pinChatMessage
-            await client.pinChatMessage(
-                chat_id=user_id,
-                message_id=sent_msg.id,
-                disable_notification=True
-            )
-            pinned += 1
-            await asyncio.sleep(0.2)  # Small delay to prevent flooding
-        except Exception as e:
-            print(f"Failed to pin for {user_id}: {str(e)}")
-            failed += 1
-            continue
-    
-    return pinned, failed
-
 @Client.on_message(filters.command("broadcast") & filters.user(ADMINS) & filters.reply)
 async def broadcast_handler(bot, message):
     """Broadcast to all users with pin option"""
@@ -148,7 +124,6 @@ async def broadcast_handler(bot, message):
     }
     
     buttons = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📌 Pin Broadcast", callback_data="pin_broadcast")],
         [InlineKeyboardButton("❌ Close", callback_data="close_broadcast")]
     ])
     
@@ -164,38 +139,8 @@ async def broadcast_handler(bot, message):
 <b>🗑 Deleted:</b> {stats['deleted']}
 <b>❌ Failed:</b> {stats['failed']}
 
-<i>Use buttons below to pin broadcast or close this message.</i>
+<i>Use buttons below to close this message.</i>
 """, reply_markup=buttons)
-
-@Client.on_callback_query(filters.regex("^pin_broadcast"))
-async def pin_broadcast_callback(bot, query):
-    try:
-        await query.answer("Starting to pin broadcast messages...")
-        status_msg = await query.message.edit_text("📌 Pinning broadcast messages...", reply_markup=None)
-        
-        # Get context from temp
-        context = temp.BROADCAST_CONTEXT
-        if not context:
-            raise Exception("Broadcast context not found")
-            
-        pinned, failed = await pin_broadcast_message(
-            bot,
-            context["successful_users"],
-            context["broadcast_message"]
-        )
-        
-        await status_msg.edit(f"""
-<b>📌 Broadcast Pin Complete!</b>
-
-✅ Successfully Pinned: <code>{pinned}</code>
-❌ Failed to Pin: <code>{failed}</code>
-
-<i>Messages have been silently pinned.</i>
-""")
-    except Exception as e:
-        error_text = f"Error during pinning: {str(e)}"
-        # Log error to file and send to admin
-        await log_error(bot, error_text, query.from_user.id)
 
 @Client.on_callback_query(filters.regex("^close_broadcast"))
 async def close_broadcast_callback(bot, query):

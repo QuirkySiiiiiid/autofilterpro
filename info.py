@@ -29,9 +29,9 @@ BOT_TOKEN = environ.get('BOT_TOKEN', "")
 CACHE_TIME = int(environ.get('CACHE_TIME', 300))
 USE_CAPTION_FILTER = bool(environ.get('USE_CAPTION_FILTER', True))
 
-PICS = (environ.get('PICS', 'https://i.ibb.co/XxbHQ9Gk/9a45465f2734f8605fed7f4af74327d7.jpg https://i.ibb.co/tT3zN48J/11de456850aa9f6658b261e32f251adc.jpg https://i.ibb.co/bjv2mPqm/13c8721971be20487907d888f9499b86.jpg https://i.ibb.co/mrRxhmWZ/015a4efb55c3afcf8ba14f2a3bcfd3fe.jpg https://i.ibb.co/T3N3r9d/26f7a1b317fe45c561e16801a5ca1dac.jpg https://i.ibb.co/h1xBWZ7t/37f6e062f2102ee3f24ef951a31f1187.jpg https://i.ibb.co/VcMwPbv5/286b8c1c0c82369d9dd2de76e376965d.jpg https://i.ibb.co/DfSJcnDy/451eddc019cbfd5771d8eea67cd3a2f1.jpg https://i.ibb.co/C59WqYfx/416846b57cac2dea82ec64e6b5d25143.jpg https://i.ibb.co/ymrgyFYr/651587a924c109a8044c1a644b0eb02d.jpg https://i.ibb.co/35YXNj90/791117c8699dbe3ec06a5b05181140ba.jpg https://i.ibb.co/ZRCNWBYG/4051986ff3e8189ad0b632a5afa4ef55.jpg https://i.ibb.co/VctbyT45/a71cda7519b6bef1a12da8aadc58a226.jpg https://i.ibb.co/Q7Jy0Xt9/a4851b8177e7543e14f50014308bbc6d.jpg https://i.ibb.co/RRQ12vP/b1cfdaaeb073b478b6b55a3082c6e39f.jpg https://i.ibb.co/cKgWD7K5/b8695471815592db698416feb2bea3b8.jpg https://i.ibb.co/4nXjyzNK/bb904bb66452e4cec045da5483a8ded9.jpg https://i.ibb.co/TMRB0Rvr/cacecd9472deaf6950a33bb2abec9658.jpg https://i.ibb.co/sJqXhk69/cb6a673c58e205907a31c86fdd0cf258.jpg https://i.ibb.co/tMtF2bVV/de14c54e3fe99a3f576bd9396517962e.jpg https://i.ibb.co/SDzP8V7t/e414da7e55508a6e6674060b0db53c4f.jpg https://i.ibb.co/4gsQC7WD/e3130de1bd5d7cb390db553b80085c31.jpg https://i.ibb.co/5gQzK63P/ec1780d148293d41ba0785281200decd.jpg https://i.ibb.co/ccWQ3p79/ef8f1b0850464b31162382955ee93c18.jpg https://i.ibb.co/kg0XW9pJ/f1476eccd899f6db25f6696f599a4ca3.jpg')).split()  # Sample pic
+PICS = (environ.get('PICS', 'https://i.ibb.co/wNcsWpYB/0abea8b13af0f2d75151920ae7ffaf7f.jpg https://i.ibb.co/4ncynXpB/3c6ed16e27c02627d49f6cdd991e02fb.jpg https://i.ibb.co/j9s7Jtbk/3d9cd65506d6362479ef1bd6d3cb942f.jpg https://i.ibb.co/60F9DSNF/6d42c13ef9b3e693f7b4cb2ca1f565b3.jpg https://i.ibb.co/7tKcQFD8/6e70f9ced988b5cda4166d4c68d2a149.jpg https://i.ibb.co/XZn0p1C0/7a1d3707ec16e1a7c8aa2220b89a1e9f.jpg https://i.ibb.co/s9gPmpy8/7ceef91432bacfea46925b11751b5a43.jpg https://i.ibb.co/3ypTH5Mp/38d7bae7a7ab97e00fc9507b6667d38c.jpg https://i.ibb.co/kVqT7yxF/39db70fa1c6a77721245b348bc7859b7.jpg https://i.ibb.co/yFGmCk22/55e3da396b527172e1cef191655be27b.jpg https://i.ibb.co/VYPmZrg2/77a61d9596dd75b46edaa303e6e969e3.jpg https://i.ibb.co/Hfwq4BH5/253dbc5b36f0892a25ea6dbeb9484a59.jpg https://i.ibb.co/gbZ2fvQF/396e16524cf91604021fcff36d34f6f0.jpg https://i.ibb.co/MDHKkrDs/0971e3c586a41a56652d379342ae9370.jpg https://i.ibb.co/WWRcL70n/7468e6368212afc73526c989c937b717.jpg https://i.ibb.co/fWHBwB0/38169b468cb9b0f6fdbd59f6a08184a5.jpg https://i.ibb.co/BVYtrSZZ/73611f128daa13ce74a6740eb1ee0f8d.jpg https://i.ibb.co/gLPDcLPb/2665084084615e6ea6ce121d94068d66.jpg https://i.ibb.co/nN2Hf46H/a317c76e7f6f0856dd4d21888d673f94.jpg https://i.ibb.co/W4KFNNDR/a470c623b44b31dcfbeaa42d796d2233.jpg https://i.ibb.co/Jwd5dC7k/b03d75aa42505c409ebda9839b7d2613.jpg https://i.ibb.co/cKRmJ2bf/b960969cbe2512fc336bc80b4fe0e4d2.jpg https://i.ibb.co/35b6kPXW/be1dd550f5bc74382a48b2d133e2eb28.jpg https://i.ibb.co/Tqh7J1RS/bea75f5e38ce9714f1fb91280a8961b8.jpg https://i.ibb.co/nq7y0dxy/c8b7b290997efc422d43afe2253a0b2d.jpg https://i.ibb.co/ZzvqBmbd/d8becb5e8d7cf7aca25715b1e44b23f7.jpg https://i.ibb.co/rGRgNTg4/f4148f02a79088e7d3cbaa77e5362f8d.jpg https://i.ibb.co/JWf5XV4S/Untitled-design.png https://i.ibb.co/XxbHQ9Gk/9a45465f2734f8605fed7f4af74327d7.jpg https://i.ibb.co/tT3zN48J/11de456850aa9f6658b261e32f251adc.jpg https://i.ibb.co/bjv2mPqm/13c8721971be20487907d888f9499b86.jpg https://i.ibb.co/mrRxhmWZ/015a4efb55c3afcf8ba14f2a3bcfd3fe.jpg https://i.ibb.co/T3N3r9d/26f7a1b317fe45c561e16801a5ca1dac.jpg https://i.ibb.co/h1xBWZ7t/37f6e062f2102ee3f24ef951a31f1187.jpg https://i.ibb.co/VcMwPbv5/286b8c1c0c82369d9dd2de76e376965d.jpg https://i.ibb.co/DfSJcnDy/451eddc019cbfd5771d8eea67cd3a2f1.jpg https://i.ibb.co/C59WqYfx/416846b57cac2dea82ec64e6b5d25143.jpg https://i.ibb.co/ymrgyFYr/651587a924c109a8044c1a644b0eb02d.jpg https://i.ibb.co/35YXNj90/791117c8699dbe3ec06a5b05181140ba.jpg https://i.ibb.co/ZRCNWBYG/4051986ff3e8189ad0b632a5afa4ef55.jpg https://i.ibb.co/VctbyT45/a71cda7519b6bef1a12da8aadc58a226.jpg https://i.ibb.co/Q7Jy0Xt9/a4851b8177e7543e14f50014308bbc6d.jpg https://i.ibb.co/RRQ12vP/b1cfdaaeb073b478b6b55a3082c6e39f.jpg https://i.ibb.co/cKgWD7K5/b8695471815592db698416feb2bea3b8.jpg https://i.ibb.co/4nXjyzNK/bb904bb66452e4cec045da5483a8ded9.jpg https://i.ibb.co/TMRB0Rvr/cacecd9472deaf6950a33bb2abec9658.jpg https://i.ibb.co/sJqXhk69/cb6a673c58e205907a31c86fdd0cf258.jpg https://i.ibb.co/tMtF2bVV/de14c54e3fe99a3f576bd9396517962e.jpg https://i.ibb.co/SDzP8V7t/e414da7e55508a6e6674060b0db53c4f.jpg https://i.ibb.co/4gsQC7WD/e3130de1bd5d7cb390db553b80085c31.jpg https://i.ibb.co/5gQzK63P/ec1780d148293d41ba0785281200decd.jpg https://i.ibb.co/ccWQ3p79/ef8f1b0850464b31162382955ee93c18.jpg https://i.ibb.co/kg0XW9pJ/f1476eccd899f6db25f6696f599a4ca3.jpg')).split()  # Sample pic
 NOR_IMG = random.choice(PICS)
-MELCOW_VID = environ.get("MELCOW_VID", "https://i.ibb.co/ymrgyFYr/651587a924c109a8044c1a644b0eb02d.jpg")
+MELCOW_VID = environ.get("MELCOW_VID", "https://i.ibb.co/hJn20Bjq/anime-welcome.gif")
 SPELL_IMG = environ.get("SPELL_IMG", "CAACAgUAAxkBAAENwWdnqY1AZaRBdPwAAccQMHRwep1PenQAAuQSAAIssohXHigAATpnIXAJNgQ")
 SUBSCRIPTION = (environ.get('SUBSCRIPTION', 'https://i.ibb.co/vCNJQXy/IMG-20241230-124316-985.jpg'))
 FSUB_PICS = (environ.get('FSUB_PICS', 'https://i.ibb.co/35YXNj90/791117c8699dbe3ec06a5b05181140ba.jpg https://i.ibb.co/ZRCNWBYG/4051986ff3e8189ad0b632a5afa4ef55.jpg https://i.ibb.co/VctbyT45/a71cda7519b6bef1a12da8aadc58a226.jpg https://i.ibb.co/Q7Jy0Xt9/a4851b8177e7543e14f50014308bbc6d.jpg https://i.ibb.co/RRQ12vP/b1cfdaaeb073b478b6b55a3082c6e39f.jpg https://i.ibb.co/cKgWD7K5/b8695471815592db698416feb2bea3b8.jpg https://i.ibb.co/4nXjyzNK/bb904bb66452e4cec045da5483a8ded9.jpg https://i.ibb.co/TMRB0Rvr/cacecd9472deaf6950a33bb2abec9658.jpg https://i.ibb.co/sJqXhk69/cb6a673c58e205907a31c86fdd0cf258.jpg https://i.ibb.co/tMtF2bVV/de14c54e3fe99a3f576bd9396517962e.jpg https://i.ibb.co/SDzP8V7t/e414da7e55508a6e6674060b0db53c4f.jpg https://i.ibb.co/4gsQC7WD/e3130de1bd5d7cb390db553b80085c31.jpg https://i.ibb.co/5gQzK63P/ec1780d148293d41ba0785281200decd.jpg https://i.ibb.co/ccWQ3p79/ef8f1b0850464b31162382955ee93c18.jpg https://i.ibb.co/kg0XW9pJ/f1476eccd899f6db25f6696f599a4ca3.jpg')).split()  # Fsub pic
@@ -60,7 +60,7 @@ QR_CODE = environ.get('QR_CODE', 'https://i.ibb.co/XxbHQ9Gk/9a45465f2734f8605fed
 OWNER_UPI_ID = environ.get('OWNER_UPI_ID', 'Siiiiid')
 
 #Auto approve 
-CHAT_ID = [int(app_chat_id) if id_pattern.search(app_chat_id) else app_chat_id for app_chat_id in environ.get('CHAT_ID', '').split()]
+CHAT_ID = [int(app_chat_id) if id_pattern.search(app_chat_id) else app_chat_id for app_chat_id in environ.get('CHAT_ID', '-1002226951292').split()]
 TEXT = environ.get("APPROVED_WELCOME_TEXT", "<b>{mention},\n\nʏᴏᴜʀ ʀᴇǫᴜᴇsᴛ ᴛᴏ ᴊᴏɪɴ {title} ɪs ᴀᴘᴘʀᴏᴠᴇᴅ.\n\‣ ᴘᴏᴡᴇʀᴇᴅ ʙʏ @Moviess_Ok</b>")
 APPROVED = environ.get("APPROVED_WELCOME", "on").lower()
 
@@ -190,7 +190,7 @@ else:
 # ============================
 # Reactions Configuration
 # ============================
-REACTIONS = ["🤝", "😇", "🤗", "😍", "👍", "🎅", "😐", "🥰", "🤩", "😱", "🤣", "😘", "👏", "😛", "😈", "🎉", "⚡️", "🫡", "🤓", "😎", "🏆", "🔥", "🤭", "🌚", "🆒", "👻", "😁"]
+REACTIONS = ["😇", "🤗", "😍", "👍", "🎅", "😐", "🥰", "🤩", "😱", "🤣", "😘", "👏", "😛", "😈", "🎉", "🫡", "🤓", "😎", "🏆", "🔥", "🤭", "🌚", "🆒", "👻", "😁"]
 
 
 
@@ -213,7 +213,7 @@ commands = [
 • /unban  - <code>ᴜɴʙᴀɴ ᴀ ᴜꜱᴇʀ.</code>
 • /channel - <code>ɢᴇᴛ ʟɪꜱᴛ ᴏꜰ ᴛᴏᴛᴀʟ ᴄᴏɴɴᴇᴄᴛᴇᴅ ɢʀᴏᴜᴘꜱ.</code>
 • /broadcast - <code>ʙʀᴏᴀᴅᴄᴀꜱᴛ ᴀ ᴍᴇꜱꜱᴀɢᴇ ᴛᴏ ᴀʟʟ ᴜꜱᴇʀꜱ.</code>
-• /grp_broadcast - <code>Bʀᴏᴀᴅᴄᴀsᴛ ᴀ ᴍᴇssᴀɢᴇ ᴛᴏ ᴀʟʟ ᴄᴏɴɴᴇᴄᴛᴇᴅ ɢʀᴏᴜᴘs</code>
+• /groupcastcast - <code>Bʀᴏᴀᴅᴄᴀsᴛ ᴀ ᴍᴇssᴀɢᴇ ᴛᴏ ᴀʟʟ ᴄᴏɴɴᴇᴄᴛᴇᴅ ɢʀᴏᴜᴘs</code>
 • /clear_junk -  <code> ᴄʟᴇᴀʀ ᴜsᴇʀ ᴊᴜɴᴋ  </code>
 • /junk_group -  <code> ᴄʟᴇᴀʀ ɢʀᴏᴜᴘ ᴊᴜɴᴋ  </code>
 • /gfilter - <code>ᴀᴅᴅ ɢʟᴏʙᴀʟ ғɪʟᴛᴇʀs.</code>
@@ -254,7 +254,7 @@ Bot_cmds = {
     "unban": "ᴜɴʙᴀɴ ᴀ ᴜꜱᴇʀ.",
     "channel": "ɢᴇᴛ ʟɪꜱᴛ ᴏғ ᴛᴏᴛᴀʟ ᴄᴏɴɴᴇᴄᴛᴇᴅ ɢʀᴏᴜᴘꜱ.",
     "broadcast": "ʙʀᴏᴀᴅᴄᴀꜱᴛ ᴀ ᴍᴇꜱꜱᴀɢᴇ ᴛᴏ ᴀʟʟ ᴜꜱᴇʀꜱ.",
-    "grp_broadcast": "ʙʀᴏᴀᴅᴄᴀsᴛ ᴀ ᴍᴇssᴀɢᴇ ᴛᴏ ᴀʟʟ ᴄᴏɴɴᴇᴄᴛᴇᴅ ɢʀᴏᴜᴘs",
+    "groupcast": "ʙʀᴏᴀᴅᴄᴀsᴛ ᴀ ᴍᴇssᴀɢᴇ ᴛᴏ ᴀʟʟ ᴄᴏɴɴᴇᴄᴛᴇᴅ ɢʀᴏᴜᴘs",
     "clear_junk": "ᴄʟᴇᴀʀ ᴜsᴇʀ ᴊᴜɴᴋ",
     "junk_group": "ᴄʟᴇᴀʀ ɢʀᴏᴜᴘ ᴊᴜɴᴋ",
     "gfilter": "ᴀᴅᴅ ɢʟᴏʙᴀʟ ғɪʟᴛᴇʀs.",

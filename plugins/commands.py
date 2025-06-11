@@ -247,6 +247,8 @@ async def start(client, message):
             os.remove(file)
             BATCH_FILES[file_id] = msgs
 
+        sent_message = []
+
         for msg in msgs:
             title = msg.get("title")
             size = get_size(int(msg.get("size", 0)))
@@ -294,6 +296,21 @@ async def start(client, message):
                 continue
             await asyncio.sleep(1)
 
+        warning = await message.reply(
+        f"<b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\n"
+        f"ᴛʜᴇꜱᴇ ʙᴀᴛᴄʜ ꜰɪʟᴇꜱ/ᴠɪᴅᴇᴏꜱ ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ɪɴ <code>{get_time(DELETE_TIME)}</code> 🫥\n"
+        "(ᴅᴜᴇ ᴛᴏ ᴄᴏᴘʏʀɪɢʜᴛ ɪꜱꜱᴜᴇꜱ)\n\n"
+        "<b><i>ᴘʟᴇᴀꜱᴇ ꜰᴏʀᴡᴀʀᴅ ᴛʜᴇꜱᴇ ꜰɪʟᴇꜱ ᴛᴏ ꜱᴏᴍᴇᴡʜᴇʀᴇ ᴇʟꜱᴇ ᴀɴᴅ ꜱᴛᴀʀᴛ ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴛʜᴇʀᴇ</i></b>")
+
+        await asyncio.sleep(DELETE_TIME)
+
+        for sent_msg in sent_message:
+            try:
+                await sent_msg.delete()
+            except Exception as e:
+                logger.error(f"Error deleting message: {e}")
+                continue
+        await warning.edit("<b>ᴛʜᴇꜱᴇ ʙᴀᴛᴄʜ ꜰɪʟᴇꜱ/ᴠɪᴅᴇᴏꜱ ʜᴀs ʙᴇᴇɴ ᴅᴇʟᴇᴛᴇᴅ.</b>")
         await sts.delete()
         return
 

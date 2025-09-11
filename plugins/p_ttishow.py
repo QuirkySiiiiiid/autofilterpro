@@ -10,7 +10,7 @@ from pyrogram.errors import ChatAdminRequired
 import asyncio 
 import os
 
-"""-----------------------------------------https://t.me/Moviess_Ok--------------------------------------"""
+"""-----------------------------------------https://t.me/WilsonVerse--------------------------------------"""
 
 @Client.on_message(filters.new_chat_members & filters.group)
 async def save_group(bot, message):
@@ -40,7 +40,7 @@ async def save_group(bot, message):
             return
         buttons = [[
                     InlineKeyboardButton('sᴜᴘᴘᴏʀᴛ', url='https://telegram.me/+hc1ZQg8SelMzZGY9'),
-                    InlineKeyboardButton('ᴜᴘᴅᴀᴛᴇꜱ', url='https://telegram.me/Moviess_Ok')
+                    InlineKeyboardButton('ᴜᴘᴅᴀᴛᴇꜱ', url='https://t.me/WilsonVerse')
                   ]]
         reply_markup=InlineKeyboardMarkup(buttons)
         await message.reply_text(

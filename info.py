@@ -45,23 +45,23 @@ LOG_CHANNEL = int(environ.get('LOG_CHANNEL', '-1002121937308'))  # Log channel i
 BIN_CHANNEL = int(environ.get('BIN_CHANNEL', '-1002121937308'))  # Bin channel id (make sure bot is admin)
 MOVIE_UPDATE_CHANNEL = int(environ.get('MOVIE_UPDATE_CHANNEL', '-1002121937308'))  # Notification of those who verify will be sent to your channel
 PREMIUM_LOGS = int(environ.get('PREMIUM_LOGS', '-1002121937308'))  # Premium logs channel id
-auth_channel = environ.get('AUTH_CHANNEL', '-1001712434868')  # Channel/Group ID for force sub (make sure bot is admin)
+auth_channel = environ.get('AUTH_CHANNEL', '-1002900102086')  # Channel/Group ID for force sub (make sure bot is admin)
 DELETE_CHANNELS = [int(dch) if id_pattern.search(dch) else dch for dch in environ.get('DELETE_CHANNELS', '').split()]
 support_chat_id = environ.get('SUPPORT_CHAT_ID', '-1002264260689')  # Support group id (make sure bot is admin)
 reqst_channel = environ.get('REQST_CHANNEL_ID', '-1001637425340')  # Request channel id (make sure bot is admin)
-AUTH_CHANNEL = [int(fch) if id_pattern.search(fch) else fch for fch in environ.get('AUTH_CHANNEL', '-1001637425340').split()]
-MULTI_FSUB = [int(channel_id) for channel_id in environ.get('MULTI_FSUB', '-1001637425340 -1001712434868 -1002231820245 -1002226951292').split() if re.match(r'^-?\d+$', channel_id)]  # Channel for force sub (make sure bot is admin)
+AUTH_CHANNEL = [int(fch) if id_pattern.search(fch) else fch for fch in environ.get('AUTH_CHANNEL', '-1002900102086').split()]
+MULTI_FSUB = [int(channel_id) for channel_id in environ.get('MULTI_FSUB', '-1001637425340  -1002231820245 -1002226951292 -1001938208245').split() if re.match(r'^-?\d+$', channel_id)]  # Channel for force sub (make sure bot is admin)
 
 
 # ============================
 # Payment Configuration
 # ============================
 QR_CODE = environ.get('QR_CODE', 'https://i.ibb.co/XxbHQ9Gk/9a45465f2734f8605fed7f4af74327d7.jpg')
-OWNER_UPI_ID = environ.get('OWNER_UPI_ID', 'Siiiiid')
+OWNER_UPI_ID = environ.get('OWNER_UPI_ID', 'Contact @Anime106_Request_bot')
 
 #Auto approve 
 CHAT_ID = [int(app_chat_id) if id_pattern.search(app_chat_id) else app_chat_id for app_chat_id in environ.get('CHAT_ID', '-1002226951292').split()]
-TEXT = environ.get("APPROVED_WELCOME_TEXT", "<b>{mention},\n\nʏᴏᴜʀ ʀᴇǫᴜᴇsᴛ ᴛᴏ ᴊᴏɪɴ {title} ɪs ᴀᴘᴘʀᴏᴠᴇᴅ.\n\‣ ᴘᴏᴡᴇʀᴇᴅ ʙʏ @Moviess_Ok</b>")
+TEXT = environ.get("APPROVED_WELCOME_TEXT", "<b>{mention},\n\nʏᴏᴜʀ ʀᴇǫᴜᴇsᴛ ᴛᴏ ᴊᴏɪɴ {title} ɪs ᴀᴘᴘʀᴏᴠᴇᴅ.\n\‣ ᴘᴏᴡᴇʀᴇᴅ ʙʏ @WilsonVerse</b>")
 APPROVED = environ.get("APPROVED_WELCOME", "on").lower()
 
 
@@ -83,10 +83,10 @@ CAPTION_LANGUAGES = ["Bhojpuri", "Hindi", "Bengali", "Tamil", "English", "Bangla
 # ============================
 # Verification Settings
 # ============================
-VERIFY = bool(environ.get('VERIFY', False))  # Verification On (True) / Off (False)
-VERIFY_EXPIRE = int(environ.get('VERIFY_EXPIRE', 24))  # Add time in hours
+VERIFY = bool(environ.get('VERIFY', True))  # Verification On (True) / Off (False)
+VERIFY_EXPIRE = int(environ.get('VERIFY_EXPIRE', 12))  # Add time in hours
 VERIFIED_LOG = int(environ.get('VERIFIED_LOG', '-1001637425340'))  # Log channel id (make sure bot is admin)
-HOW_TO_VERIFY = environ.get('HOW_TO_VERIFY', 'https://t.me/Moviess_Ok/43')  # How to open tutorial link for verification
+HOW_TO_VERIFY = environ.get('HOW_TO_VERIFY', 'https://t.me/WilsonVerse/4')  # How to open tutorial link for verification
 
 # ============================
 # Link Shortener Configuration
@@ -94,16 +94,16 @@ HOW_TO_VERIFY = environ.get('HOW_TO_VERIFY', 'https://t.me/Moviess_Ok/43')  # Ho
 IS_SHORTLINK = bool(environ.get('IS_SHORTLINK', False))
 SHORTLINK_URL = environ.get('SHORTLINK_URL', 'inshorturl.com')
 SHORTLINK_API = environ.get('SHORTLINK_API', '')
-TUTORIAL = environ.get('TUTORIAL', 'https://t.me/How_to_Download_7x/30')  # Tutorial video link for opening shortlink website
+TUTORIAL = environ.get('TUTORIAL', 'https://t.me/WilsonVerse/4')  # Tutorial video link for opening shortlink website
 IS_TUTORIAL = bool(environ.get('IS_TUTORIAL', False))
 
 # ============================
 # Channel & Group Links Configuration
 # ============================
 GRP_LNK = environ.get('GRP_LNK', 'https://t.me/+kj3GsiQX8rxhMTQ1')
-CHNL_LNK = environ.get('CHNL_LNK', 'https://t.me/Moviess_Ok')
-OWNER_LNK = environ.get('OWNER_LNK', 'https://t.me/Moviess_Ok')
-MOVIE_UPDATE_CHANNEL_LNK = environ.get('MOVIE_UPDATE_CHANNEL_LNK', 'https://t.me/Moviess_Ok')
+CHNL_LNK = environ.get('CHNL_LNK', 'https://t.me/WilsonVerse')
+OWNER_LNK = environ.get('OWNER_LNK', 'https://t.me/Anime106_Request_bot')
+MOVIE_UPDATE_CHANNEL_LNK = environ.get('MOVIE_UPDATE_CHANNEL_LNK', 'https://t.me/WilsonVerse')
 OWNERID = int(os.environ.get('OWNERID', '2090517919'))  # Replace with the actual admin ID
 
 # ============================

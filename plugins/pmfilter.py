@@ -2040,15 +2040,15 @@ async def cb_handler(client: Client, query: CallbackQuery):
     
     elif query.data == "group_info":
         buttons = [[
-            InlineKeyboardButton('× ᴀʟʟ ᴏᴜʀ ʟɪɴᴋꜱ ×', url="https://t.me/Moviess_Ok")
+            InlineKeyboardButton('× ᴀʟʟ ᴏᴜʀ ʟɪɴᴋꜱ ×', url="https://t.me/WilsonVerse")
        ],[
             InlineKeyboardButton('• ɢʀᴏᴜᴘ •', url="https://t.me/+Awbl4ndpOd85YjZl"),
-            InlineKeyboardButton('• ᴜᴘᴅᴀᴛᴇs •', url="https://t.me/Moviess_Ok")
+            InlineKeyboardButton('• ᴜᴘᴅᴀᴛᴇs •', url="https://t.me/WilsonVerse")
        ],[
-            InlineKeyboardButton('• sᴇʀɪᴇsғʟɪx •', url="https://t.me/Moviess_Ok"),
+            InlineKeyboardButton('• sᴇʀɪᴇsғʟɪx •', url="https://t.me/WilsonVerse"),
             InlineKeyboardButton('• Mᴀɴɢᴀ •', url="https://t.me/Eternal0Manga")
        ],[
-            InlineKeyboardButton('• ᴀɴɪᴍᴇ ᴄʀᴜɪsᴇ •', url="https://t.me/Moviess_Ok")
+            InlineKeyboardButton('• ᴀɴɪᴍᴇ ᴄʀᴜɪsᴇ •', url="https://t.me/WilsonVerse")
        ],[ 
             InlineKeyboardButton('• ʙᴀᴄᴋ •', callback_data='start')
         ]]
@@ -2199,7 +2199,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         
     elif query.data == "source":
         buttons = [[
-            InlineKeyboardButton('sᴏᴜʀᴄᴇ ᴄᴏᴅᴇ 📜', url='https://t.me/Moviess_Ok'),
+            InlineKeyboardButton('sᴏᴜʀᴄᴇ ᴄᴏᴅᴇ 📜', url='https://t.me/WilsonVerse'),
             InlineKeyboardButton('⇋ ʙᴀᴄᴋ ⇋', callback_data='about')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
